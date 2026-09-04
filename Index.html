@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"/>
+<meta name="theme-color" content="#0f3d35"/>
+<title>Capturador de Rutograma – Campo (Offline)</title>
+<style>
+:root{--g900:#0b2f2a;--g800:#0f3d35;--g700:#145247;--g600:#1a6358;--g100:#e9f4f1;--text:#0d1b1a;--muted:#5b6b6a;--card:#fff;--bdr:#d7e5e1;--shadow:0 6px 22px rgba(0,0,0,.08);--radius:14px;--alto:#d7263d;--medio:#f29f05;--bajo:#2f8f7d}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--text);background:var(--g100);font-size:15px}
+body{padding-bottom:80px}
+.top{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,var(--g900),var(--g600));color:#fff;padding:10px 14px 8px}
+.top h1{font-size:15px;font-weight:900;display:flex;align-items:center;gap:7px}
+.top .sub{font-size:11px;opacity:.9;margin-top:2px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#saveState{font-size:10.5px;font-weight:700;background:rgba(255,255,255,.15);padding:2px 8px;border-radius:999px}
+.tabs{position:sticky;top:52px;z-index:49;display:flex;background:#fff;border-bottom:2px solid var(--bdr);overflow-x:auto}
+.tb{flex:1 0 auto;padding:11px 12px;font-size:12px;font-weight:800;cursor:pointer;background:none;border:none;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tb.on{color:var(--g800);border-bottom-color:var(--g700)}
+.wrap{max-width:820px;margin:0 auto;padding:12px}
+.sect{display:none}.sect.on{display:block}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:12px}
+.card h2{font-size:13px;font-weight:900;color:var(--g800);margin-bottom:10px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.4px}
+.card h2 .hint{font-size:10px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;margin-left:auto}
+label{font-size:11px;color:var(--muted);font-weight:800;display:block;margin:0 0 4px;letter-spacing:.3px;text-transform:uppercase}
+label .req{color:var(--alto)}
+input,select,textarea{width:100%;padding:11px 12px;border:1.5px solid var(--bdr);border-radius:11px;outline:none;font-size:15px;background:#fff;color:var(--text);font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:#7dc2b5;box-shadow:0 0 0 3px rgba(125,194,181,.2)}
+textarea{min-height:70px;resize:vertical;line-height:1.4}
+.fld{margin-bottom:11px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:560px){.grid3{grid-template-columns:1fr 1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;border-radius:12px;border:none;font-size:14px;font-weight:800;cursor:pointer;text-decoration:none;transition:filter .12s}
+.btn:active{filter:brightness(.92)}
+.btn-p{background:var(--g800);color:#fff}
+.btn-o{background:#fff;color:var(--g800);border:1.5px solid var(--bdr)}
+.btn-d{background:#fff;color:var(--alto);border:1.5px solid #f3b6be}
+.btn-gps{background:linear-gradient(135deg,#0f6b5c,#1a8f7d);color:#fff;width:100%;padding:15px;font-size:15px}
+.btn-full{width:100%}
+.btn-row{display:flex;gap:9px;flex-wrap:wrap}
+.btn-row .btn{flex:1 1 auto}
+.chips{display:flex;gap:8px}
+.chip{flex:1;text-align:center;padding:12px 6px;border-radius:12px;border:2px solid var(--bdr);cursor:pointer;font-weight:900;font-size:14px;background:#fff;user-select:none}
+.chip small{display:block;font-size:9.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.chip.on-alto{border-color:var(--alto);background:#fdf0f1;color:#a31d2e}
+.chip.on-medio{border-color:var(--medio);background:#fffbf0;color:#b07800}
+.chip.on-bajo{border-color:var(--bajo);background:#eefaf7;color:#1a7060}
+.val-box{border:1.5px dashed var(--bdr);border-radius:12px;padding:12px;text-align:center;background:#f6faf9}
+.val-box .vl{font-size:24px;font-weight:900;line-height:1}
+.val-box .vs{font-size:11px;color:var(--muted);font-weight:700;margin-top:3px}
+.va-3{color:var(--alto)}.va-2{color:#c88500}.va-1{color:var(--bajo)}
+.gps-out{font-size:12.5px;font-weight:800;color:var(--g800);background:#eefaf7;border:1px solid #b7e0d6;border-radius:10px;padding:9px 11px;margin-top:8px;display:none}
+.gps-out.show{display:block}
+.gps-err{background:#fdf0f1;border-color:#f3b6be;color:#a31d2e}
+.acc{font-size:10.5px;font-weight:600;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+.stat{border:1.5px solid var(--bdr);border-radius:11px;padding:9px 4px;text-align:center;background:#fff}
+.stat .k{font-size:9.5px;color:var(--muted);font-weight:800;text-transform:uppercase}
+.stat .v{font-size:20px;font-weight:900;margin-top:1px}
+.plist{list-style:none}
+.pitem{border:1.5px solid var(--bdr);border-left-width:5px;border-radius:11px;padding:10px 12px;margin-bottom:9px;background:#fff}
+.pitem.l-Alto{border-left-color:var(--alto)}.pitem.l-Medio{border-left-color:var(--medio)}.pitem.l-Bajo{border-left-color:var(--bajo)}
+.pi-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pi-t{font-weight:900;font-size:14px;color:var(--g800)}
+.pi-b{font-size:9.5px;font-weight:900;padding:2px 9px;border-radius:999px;color:#fff;white-space:nowrap}
+.b-Alto{background:var(--alto)}.b-Medio{background:#c88500}.b-Bajo{background:var(--bajo)}
+.pi-m{font-size:12px;color:#2a3a38;margin-top:5px;line-height:1.4}
+.pi-c{font-size:11px;color:var(--muted);margin-top:4px;font-family:ui-monospace,monospace}
+.pi-act{display:flex;gap:7px;margin-top:9px}
+.pi-act .btn{flex:1;padding:8px;font-size:12.5px}
+.mini{font-size:10.5px;color:var(--muted);line-height:1.5}
+.alertbox{border:1.5px solid #f5d87a;background:#fffbf0;border-radius:11px;padding:10px 12px;font-size:11.5px;color:#5a3e00;line-height:1.5}
+.okbox{border:1.5px solid #b7e0d6;background:#eefaf7;border-radius:11px;padding:10px 12px;font-size:11.5px;color:#1a5c50;line-height:1.5}
+.plot{width:100%;height:180px;border:1.5px solid var(--bdr);border-radius:11px;background:#f6faf9;display:block;margin-top:8px}
+.emg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.pill-add{font-size:11px;padding:6px 10px;border-radius:999px;border:1.5px dashed var(--bdr);background:#fff;cursor:pointer;font-weight:700;color:var(--g700)}
+.qp{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.qp b{font-size:10px;color:var(--muted);width:100%;font-weight:800;text-transform:uppercase;margin-bottom:1px}
+.qp span{font-size:11px;padding:5px 9px;border-radius:999px;border:1px solid var(--bdr);background:#f6faf9;cursor:pointer;color:#2a3a38}
+.qp span:active{background:#e0f0ec}
+.qp .qp-g{width:100%;font-size:9.5px;font-weight:800;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin:7px 0 1px;padding-top:5px;border-top:1px dashed var(--bdr)}
+.qp .qp-g:first-of-type{border-top:none;padding-top:0;margin-top:2px}
+.cap-title{cursor:pointer;user-select:none}
+.cap-title .cap-n{font-size:12px;font-weight:700;color:var(--g600);background:#eaf5f2;border:1px solid var(--bdr);border-radius:999px;padding:1px 9px;margin-left:4px;vertical-align:middle}
+.cap-title.ready{color:var(--g700)}
+.cap-title.ready .cap-go{display:inline-block;background:var(--g700);color:#fff;border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:800;animation:capPulse 1.3s ease-in-out infinite}
+@keyframes capPulse{0%,100%{box-shadow:0 0 0 0 rgba(20,82,71,.45)}50%{box-shadow:0 0 0 7px rgba(20,82,71,0)}}
+.btn.dis{opacity:.55}
+.fld.sub{margin-top:-2px;padding:9px 10px;background:#f6faf9;border:1px solid var(--bdr);border-left:3px solid var(--g600);border-radius:10px}
+.fld.sub>label{color:var(--g700)}
+.fld.sub.req{border-left-color:#b07800;background:#fffdf5}
+.fld.sub.req>label{color:#8a6100}
+.fld.sub.req .chipsel span.sel{background:#8a6100;border-color:#8a6100}
+.dualchk{display:flex;gap:8px;flex-wrap:wrap}
+.dualchk .ck{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#2a3a38;background:#f6faf9;border:1px solid var(--bdr);border-radius:10px;padding:8px 12px;cursor:pointer;flex:1;min-width:120px}
+.dualchk .ck input{width:17px;height:17px;accent-color:var(--g700)}
+.dualchk .ck.no input{accent-color:#8a6100}
+.dualchk .ck:has(input:checked){border-color:var(--g600);background:#eaf5f2}
+.dualchk .ck.no:has(input:checked){border-color:#b07800;background:#fffdf5}
+.chipsel{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px}
+.chipsel span{font-size:11.5px;padding:6px 10px;border-radius:999px;border:1px solid var(--bdr);background:#fff;cursor:pointer;color:#2a3a38;user-select:none}
+.chipsel span:active{transform:scale(.97)}
+.chipsel span.sel{background:var(--g700);color:#fff;border-color:var(--g700);font-weight:700}
+.otra{font-size:13px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--g900);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.fabsave{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid var(--bdr);padding:10px 14px;display:flex;gap:9px;z-index:60;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+.fabsave .btn{flex:1}
+.hidden{display:none!important}
+.count-pill{font-size:11px;font-weight:800;color:var(--muted);margin-left:auto}
+details{border:1px solid var(--bdr);border-radius:11px;padding:0;margin-bottom:10px;background:#fff}
+summary{padding:11px 13px;font-weight:800;font-size:12.5px;cursor:pointer;color:var(--g800)}
+details[open] summary{border-bottom:1px solid var(--bdr)}
+details .dc{padding:12px}
+.photo-thumb{max-width:100%;border-radius:10px;margin-top:6px;border:1px solid var(--bdr)}
+.warn-inline{font-size:10.5px;color:#a31d2e;font-weight:700;margin-top:4px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>📍 Capturador de Rutograma <span style="font-size:10px;font-weight:700;background:rgba(255,255,255,.18);padding:2px 7px;border-radius:999px">OFFLINE</span></h1>
+  <div class="sub">
+    <span id="topRuta">Sin ruta definida · configure el proyecto</span>
+    <span id="saveState">Guardado local</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tb on" data-s="cfg" onclick="tab('cfg')">⚙️ Proyecto</button>
+  <button class="tb" data-s="cap" onclick="tab('cap')">➕ Capturar</button>
+  <button class="tb" data-s="pts" onclick="tab('pts')">📋 Puntos <span id="tabCnt"></span></button>
+  <button class="tb" data-s="emg" onclick="tab('emg')">🚨 Emergencias</button>
+  <button class="tb" data-s="gen" onclick="tab('gen')">📤 Generar</button>
+</div>
+
+<div class="wrap">
+
+<!-- ================= CONFIGURACIÓN ================= -->
+<section id="s-cfg" class="sect on">
+  <div class="card">
+    <h2>🏢 Identificación del entregable <span class="hint">obligatorio</span></h2>
+    <div class="fld"><label>Cliente <span class="req">*</span></label><input id="m_cliente" placeholder="Ej: Bavaria S.A."/></div>
+    <div class="grid2">
+      <div class="fld"><label>Fecha de ejecución <span class="req">*</span></label><input id="m_fecha" type="date"/></div>
+      <div class="fld"><label>Consultor vial</label><input id="m_consultor" placeholder="Nombre de quien ejecuta"/></div>
+    </div>
+    <div class="fld"><label>Nombre de la ruta <span class="req">*</span></label><input id="m_ruta" placeholder="Ej: Barrancabermeja → Campo Pauta Zona Rural"/></div>
+  </div>
+
+  <div class="card">
+    <h2>🚏 Origen y destino</h2>
+    <div class="fld"><label>Origen — nombre</label><input id="m_orig_nom" placeholder="Ej: Bavaria – Barrancabermeja"/></div>
+    <div class="grid3" style="align-items:end">
+      <div class="fld"><label>Origen Lat</label><input id="m_orig_lat" inputmode="decimal" placeholder="7.042174"/></div>
+      <div class="fld"><label>Origen Lon</label><input id="m_orig_lon" inputmode="decimal" placeholder="-73.829055"/></div>
+      <div class="fld"><button class="btn btn-o btn-full" onclick="gpsTo('m_orig_lat','m_orig_lon')">📡 GPS aquí</button></div>
+    </div>
+    <div class="fld"><label>Destino — nombre</label><input id="m_dest_nom" placeholder="Ej: Campo Pauta Zona Rural, Santander"/></div>
+    <p class="mini" style="margin:-4px 0 8px">📍 Las coordenadas del destino se completan solas con el <b>último punto capturado</b>. Puedes sobrescribirlas a mano si lo necesitas.</p>
+    <div class="grid3" style="align-items:end">
+      <div class="fld"><label>Destino Lat</label><input id="m_dest_lat" inputmode="decimal" placeholder="7.549376"/></div>
+      <div class="fld"><label>Destino Lon</label><input id="m_dest_lon" inputmode="decimal" placeholder="-73.596409"/></div>
+      <div class="fld"><button class="btn btn-o btn-full" onclick="gpsTo('m_dest_lat','m_dest_lon')">📡 GPS aquí</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🛣️ Datos de la vía</h2>
+    <div class="grid3">
+      <div class="fld"><label>Km totales</label><input id="m_km" inputmode="decimal" placeholder="Ej: 67"/></div>
+      <div class="fld"><label>Tiempo (h)</label><input id="m_tiempo" placeholder="Ej: 1h 20min"/></div>
+      <div class="fld"><label>Nº de tramos</label><input id="m_ntramos" type="number" min="1" max="8" value="4"/></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🛡️ Recomendaciones generales <span class="hint">opcional</span></h2>
+    <div class="fld"><textarea id="m_recs" placeholder="Una recomendación por línea. Ej:&#10;Pausas activas cada 2 h.&#10;Prohibido el celular en todo el recorrido.&#10;Abastecer combustible antes de salir."></textarea></div>
+  </div>
+</section>
+
+<!-- ================= CAPTURAR PUNTO ================= -->
+<section id="s-cap" class="sect">
+  <div class="card">
+    <h2 id="capTitle" class="cap-title" onclick="nuevoPunto()" title="Toca para iniciar un nuevo punto">➕ Nuevo punto de riesgo</h2>
+    <p class="mini" style="margin:-4px 0 8px">Tras <b>Guardar punto</b>, toca este título para activar el siguiente registro.</p>
+    <button class="btn btn-gps" onclick="capGPS()">📡 Capturar mi ubicación GPS</button>
+    <div id="gpsOut" class="gps-out"></div>
+    <div class="grid3" style="margin-top:10px;align-items:end">
+      <div class="fld" style="margin-bottom:0"><label>Latitud <span class="req">*</span></label><input id="c_lat" inputmode="decimal" placeholder="7.1244"/></div>
+      <div class="fld" style="margin-bottom:0"><label>Longitud <span class="req">*</span></label><input id="c_lon" inputmode="decimal" placeholder="-73.5841"/></div>
+      <div class="fld" style="margin-bottom:0"><label>Km</label><input id="c_km" inputmode="decimal" placeholder="30.4"/></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⚠️ Valoración del riesgo</h2>
+    <p class="mini" style="margin-bottom:8px">Matriz Severidad × Probabilidad (formato base). El nivel se calcula solo.</p>
+    <div class="grid2">
+      <div class="fld"><label>Severidad</label>
+        <select id="c_sev" onchange="calcVal()"><option value="Alta">Alta</option><option value="Media" selected>Media</option><option value="Baja">Baja</option></select></div>
+      <div class="fld"><label>Probabilidad</label>
+        <select id="c_prob" onchange="calcVal()"><option value="Muy probable">Muy probable</option><option value="Probable" selected>Probable</option><option value="Poco probable">Poco probable</option></select></div>
+    </div>
+    <div class="val-box"><div id="valLbl" class="vl va-2">MEDIO</div><div class="vs">Nivel calculado · Valoración: <b id="valWord">Importante</b> (<span id="valNum">2</span>/3)</div></div>
+    <p class="mini" style="margin-top:7px">También puedes forzar el nivel manualmente si tu metodología lo exige:</p>
+    <div class="chips" style="margin-top:6px">
+      <div class="chip" id="chAlto" onclick="setNivel('Alto')">ALTO<small>Crítico</small></div>
+      <div class="chip on-medio" id="chMedio" onclick="setNivel('Medio')">MEDIO<small>Importante</small></div>
+      <div class="chip" id="chBajo" onclick="setNivel('Bajo')">BAJO<small>Moderado</small></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔎 Descripción del riesgo</h2>
+    <div class="fld"><label>Ubicación (sector)</label><input id="c_ubic" placeholder="Ej: Barrancabermeja - Santander"/></div>
+    <div class="fld"><label>Descripción del riesgo / peligro <span class="req">*</span></label>
+      <textarea id="c_desc" placeholder="Ej: Bifurcación con poca señalización, ingreso de vehículos pesados…"></textarea>
+      <div class="qp" id="qpDesc"><b>Peligros frecuentes (toca para agregar)</b></div>
+    </div>
+    <div class="fld"><label>Medida preventiva / control <span class="req">*</span></label>
+      <textarea id="c_ctrl" placeholder="Ej: Disminuir a 30 km/h. Mantener atención. No adelantar."></textarea>
+      <div class="qp" id="qpCtrl"><b>Medidas frecuentes</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧱 Características de la vía</h2>
+    <div class="grid2">
+      <div class="fld"><label>Diseño / geometría</label>
+        <input id="c_dis" list="dlDis" placeholder="Tramo de vía, Retorno, Bifurcación…"/>
+        <datalist id="dlDis"><option>Locación</option><option>Tramo de vía</option><option>Bifurcación a la derecha</option><option>Bifurcación a la izquierda</option><option>Retorno</option><option>Intercambiador</option><option>Intersección</option><option>Cruce escolar</option><option>Cruce peatonal</option><option>Puente</option><option>Puente peatonal</option><option>Galibo</option><option>Peaje</option><option>Curva</option><option>Giro a la derecha</option><option>Giro a la izquierda</option></datalist></div>
+      <div class="fld"><label>Estado de la vía</label>
+        <input id="c_est" list="dlEst" placeholder="Buena, Regular…"/>
+        <datalist id="dlEst"><option>Buena</option><option>Regular</option><option>Mala</option><option>Con huecos</option><option>Derrumbe</option><option>En reparación</option><option>Hundimiento</option><option>Parcheada</option><option>Rizada</option><option>Fisurada</option><option>Inundada</option></datalist></div>
+    </div>
+    <div class="grid2">
+      <div class="fld"><label>Material / rodadura</label>
+        <input id="c_mat" list="dlMat" placeholder="Asfalto…"/>
+        <datalist id="dlMat"><option>Asfalto</option><option>Concreto</option><option>Afirmado</option><option>Adoquín</option><option>Empedrado</option><option>Madera</option><option>Tierra</option><option>Destapado</option></datalist></div>
+      <div class="fld"><label>Utilización</label>
+        <select id="c_uti"><option>DOBLE SENTIDO</option><option>ÚNICO SENTIDO</option><option>CALZADA DIVIDIDA</option></select></div>
+    </div>
+    <div class="grid2">
+      <div class="fld"><label>Velocidad diseño (km/h)</label><input id="c_veld" inputmode="numeric" placeholder="80"/></div>
+      <div class="fld"><label>Velocidad operación (km/h)</label><input id="c_velo" inputmode="numeric" placeholder="100"/></div>
+    </div>
+    <div class="grid2">
+      <div class="fld"><label>Señal vertical</label>
+        <div class="dualchk">
+          <label class="ck"><input type="checkbox" id="c_senV_si" onchange="toggleCuales('V')"> Sí, existen</label>
+          <label class="ck no"><input type="checkbox" id="c_senV_no" onchange="toggleCuales('V')"> No / faltan</label>
+        </div></div>
+      <div class="fld"><label>Iluminación</label>
+        <select id="c_ilum"><option>Buena</option><option>Regular</option><option>Mala</option></select></div>
+    </div>
+    <div class="fld sub" id="wrapSenV">
+      <label>¿Cuáles? <span class="hint">señales verticales presentes</span></label>
+      <div class="chipsel" id="chSenV"></div>
+      <input id="c_senV_otra" class="otra" placeholder="Otras: escribe cuáles…"/>
+    </div>
+    <div class="fld sub req" id="wrapReqV">
+      <label>¿Cuáles señales verticales se requieren? <span class="hint">faltantes / recomendadas</span></label>
+      <div class="chipsel" id="chReqV"></div>
+      <input id="c_senV_req_otra" class="otra" placeholder="Otras: escribe cuáles…"/>
+    </div>
+
+    <div class="fld"><label>Señal horizontal</label>
+      <div class="dualchk">
+        <label class="ck"><input type="checkbox" id="c_senH_si" onchange="toggleCuales('H')"> Sí, existen</label>
+        <label class="ck no"><input type="checkbox" id="c_senH_no" onchange="toggleCuales('H')"> No / faltan</label>
+      </div></div>
+    <div class="fld sub" id="wrapSenH">
+      <label>¿Cuáles? <span class="hint">demarcación y dispositivos presentes</span></label>
+      <div class="chipsel" id="chSenH"></div>
+      <input id="c_senH_otra" class="otra" placeholder="Otras: escribe cuáles…"/>
+    </div>
+    <div class="fld sub req" id="wrapReqH">
+      <label>¿Cuáles señales horizontales se requieren? <span class="hint">faltantes / recomendadas</span></label>
+      <div class="chipsel" id="chReqH"></div>
+      <input id="c_senH_req_otra" class="otra" placeholder="Otras: escribe cuáles…"/>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📷 Evidencia fotográfica <span class="hint">opcional</span></h2>
+    <input id="c_foto" type="file" accept="image/*" capture="environment" onchange="loadFoto(this)"/>
+    <div id="fotoPrev"></div>
+    <p class="warn-inline hidden" id="fotoWarn">⚠ Las fotos aumentan mucho el peso guardado. Se comprimen automáticamente, pero para muchos puntos usa el respaldo JSON con frecuencia.</p>
+  </div>
+</section>
+
+<!-- ================= PUNTOS ================= -->
+<section id="s-pts" class="sect">
+  <div class="card">
+    <h2>📋 Puntos capturados <span id="ptsCnt" class="count-pill"></span></h2>
+    <div class="stats">
+      <div class="stat"><div class="k">Total</div><div class="v" id="stT" style="color:var(--g800)">0</div></div>
+      <div class="stat"><div class="k">Alto</div><div class="v" id="stA" style="color:var(--alto)">0</div></div>
+      <div class="stat"><div class="k">Medio</div><div class="v" id="stM" style="color:#c88500">0</div></div>
+      <div class="stat"><div class="k">Bajo</div><div class="v" id="stB" style="color:var(--bajo)">0</div></div>
+    </div>
+    <label>Croquis offline (posiciones relativas, sin mapa)</label>
+    <canvas id="plot" class="plot"></canvas>
+    <p class="mini" style="margin-top:5px">🔵 verde=Bajo · 🟠 medio · 🔴 alto · ▶ inicio · ■ fin. No requiere señal; es una vista de control de captura.</p>
+  </div>
+  <div class="card">
+    <div class="fld" style="margin-bottom:8px"><input id="ptSearch" placeholder="🔍 Buscar por nº, descripción o medida" oninput="renderPts()"/></div>
+    <ul id="ptList" class="plist"></ul>
+  </div>
+</section>
+
+<!-- ================= EMERGENCIAS ================= -->
+<section id="s-emg" class="sect">
+  <div class="card">
+    <h2>☎️ Red de emergencia de la ruta</h2>
+    <p class="mini" style="margin-bottom:8px">Líneas nacionales precargadas del formato base. Edita o agrega las locales.</p>
+    <div id="emgList"></div>
+    <button class="pill-add" onclick="addEmg()">＋ Agregar teléfono</button>
+  </div>
+  <div class="card">
+    <h2>🏥 Infraestructura en ruta (POIs)</h2>
+    <p class="mini" style="margin-bottom:8px">Hospitales, bomberos, policía y estaciones de servicio que aparecerán como capas en el mapa del entregable.</p>
+    <details>
+      <summary>➕ Agregar punto de infraestructura</summary>
+      <div class="dc">
+        <div class="grid2">
+          <div class="fld"><label>Tipo</label><select id="poi_tipo"><option value="hosp">🏥 Hospital / Salud</option><option value="bomb">🚒 Bomberos</option><option value="pol">👮 Policía</option><option value="gas">⛽ Estación servicio</option></select></div>
+          <div class="fld"><label>Teléfono</label><input id="poi_tel" placeholder="(607) 601 0105"/></div>
+        </div>
+        <div class="fld"><label>Nombre</label><input id="poi_nom" placeholder="Ej: Hospital Regional del Magdalena Medio"/></div>
+        <div class="fld"><label>Dirección</label><input id="poi_dir" placeholder="Carrera 17 # 57-119"/></div>
+        <div class="grid3" style="align-items:end">
+          <div class="fld"><label>Lat</label><input id="poi_lat" inputmode="decimal"/></div>
+          <div class="fld"><label>Lon</label><input id="poi_lon" inputmode="decimal"/></div>
+          <div class="fld"><button class="btn btn-o btn-full" onclick="gpsTo('poi_lat','poi_lon')">📡 GPS</button></div>
+        </div>
+        <div class="fld"><label>Nota</label><input id="poi_nota" placeholder="Urgencias 24h…"/></div>
+        <button class="btn btn-p btn-full" onclick="addPOI()">Guardar POI</button>
+      </div>
+    </details>
+    <ul id="poiList" class="plist"></ul>
+  </div>
+</section>
+
+<!-- ================= GENERAR ================= -->
+<section id="s-gen" class="sect">
+  <div class="card">
+    <h2>📤 Exportar y generar</h2>
+    <div id="genCheck" class="alertbox" style="margin-bottom:12px"></div>
+    <label>Entregable final</label>
+    <button class="btn btn-p btn-full" style="margin-bottom:8px" onclick="genDeliverable()">🗺️ Generar Rutograma HTML (entregable)</button>
+    <p class="mini" style="margin-bottom:14px">Produce el HTML interactivo con la data capturada (mapa, tramos, tabla, gráfico). <b>Ese archivo sí requiere internet para ver el mapa base</b>, igual que el original.</p>
+    <label>Respaldo y continuación</label>
+    <div class="btn-row" style="margin-bottom:8px">
+      <button class="btn btn-o" onclick="exportJSON()">💾 Descargar respaldo (.json)</button>
+      <label class="btn btn-o" style="cursor:pointer">📂 Cargar respaldo<input type="file" accept=".json,application/json" class="hidden" onchange="importJSON(this)"/></label>
+    </div>
+    <p class="mini" style="margin-bottom:14px">El respaldo JSON es tu seguridad real: la memoria del navegador se puede borrar. Descárgalo al terminar cada jornada.</p>
+    <label>Formato tabular</label>
+    <button class="btn btn-o btn-full" style="margin-bottom:14px" onclick="exportCSV()">📊 Descargar CSV (para el Excel base)</button>
+    <label>Reiniciar</label>
+    <button class="btn btn-d btn-full" onclick="wipe()">🗑️ Borrar todo el proyecto</button>
+  </div>
+  <div class="card">
+    <h2>ℹ️ Cómo funciona sin conexión</h2>
+    <div class="okbox">
+      <b>Este capturador funciona 100% offline.</b><br>
+      • El GPS usa el hardware del dispositivo, no necesita datos.<br>
+      • La data se autoguarda en el navegador del equipo.<br>
+      • Ábrelo una vez con señal para que quede en caché; luego funciona en modo avión.<br>
+      • Para no perder nada: <b>descarga el respaldo JSON</b> con frecuencia.
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="fabsave" id="fabSave">
+  <button class="btn btn-o" onclick="clearForm()">Limpiar</button>
+  <button class="btn btn-p" id="btnSavePt" onclick="savePoint()">✔ Guardar punto</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ===== PLANTILLA DEL ENTREGABLE (cierres de script internos escapados) ===== -->
+<script type="text/template" id="tplDeliverable">
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"/>
+<title>Rutograma – @@TITLE@@</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+<style>
+:root{--g900:#0b2f2a;--g800:#0f3d35;--g700:#145247;--g600:#1a6358;--g100:#e9f4f1;--text:#0d1b1a;--muted:#5b6b6a;--card:#fff;--bdr:#d7e5e1;--shadow:0 8px 28px rgba(0,0,0,.09);--radius:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--text);background:var(--g100)}
+.screen{height:100%;overflow:hidden}
+#s-mapa{display:grid;grid-template-columns:450px 1fr;gap:12px;padding:12px}
+#s-desc,#s-puntos{display:none;padding:12px}
+.panel{background:var(--card);border:1px solid var(--bdr);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 24px);overflow:hidden}
+.ph{padding:11px 16px 10px;background:linear-gradient(135deg,var(--g900),var(--g600));color:#fff;flex-shrink:0}
+.ph h1{font-size:14px;font-weight:900;margin-bottom:3px}
+.ph .sub{font-size:10.5px;opacity:.9;line-height:1.4}
+.tabs{display:flex;flex-shrink:0;border-bottom:2px solid var(--bdr);background:var(--g100)}
+.tb{padding:9px 15px;font-size:11.5px;font-weight:700;cursor:pointer;background:none;border:none;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;white-space:nowrap}
+.tb.on{color:var(--g800);border-bottom-color:var(--g700);background:var(--card)}
+.tb:hover:not(.on){color:var(--g700);background:rgba(20,82,71,.05)}
+.pb{padding:10px 14px 6px;display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+label{font-size:10.5px;color:var(--muted);display:block;margin-bottom:4px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+input[type=text],select{width:100%;padding:8px 11px;border:1.5px solid var(--bdr);border-radius:10px;outline:none;font-size:12.5px;background:#fff;color:var(--text)}
+input[type=text]:focus,select:focus{border-color:#7dc2b5;box-shadow:0 0 0 3px rgba(125,194,181,.2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;border:1.5px solid var(--bdr);cursor:pointer;user-select:none;background:#fff;font-size:11px;font-weight:700}
+.chip.on{border-color:#2f8f7d;background:#f0faf8;box-shadow:0 0 0 2px rgba(47,143,125,.15)}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.dot.alto{background:#d7263d}.dot.medio{background:#f29f05}.dot.bajo{background:#2f8f7d}
+.dot.hosp{background:#e05c00}.dot.bomb{background:#c81d1d}.dot.pol{background:#1565c0}.dot.gas{background:#0077b6}
+.stats4{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.stat{border:1.5px solid var(--bdr);border-radius:10px;padding:7px 6px;background:#fff;text-align:center}
+.stat .k{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.stat .v{font-size:17px;font-weight:900;line-height:1.1;margin-top:2px}
+.v-a{color:#d7263d}.v-m{color:#c88500}.v-b{color:#2f8f7d}.v-n{color:var(--g800)}
+.alerta{border:1.5px solid rgba(215,38,61,.4);border-radius:10px;padding:7px 11px;background:rgba(253,240,241,.7);font-size:10px;color:#7a1020;line-height:1.45;font-weight:600}
+.list{list-style:none;overflow-y:auto;flex:1;border-top:1.5px solid var(--bdr)}
+.item{border-bottom:1px solid var(--bdr);padding:9px 14px;cursor:pointer}
+.item:hover{background:rgba(20,82,71,.05)}.item.hl{background:rgba(20,82,71,.07)}
+.it{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.it-ttl{font-weight:800;font-size:12px;line-height:1.25;flex:1}
+.bx{font-size:9.5px;padding:2px 7px;border-radius:999px;border:1.5px solid;background:#fff;white-space:nowrap;font-weight:700;flex-shrink:0}
+.bx.alto{border-color:#d7263d;color:#a31d2e}.bx.medio{border-color:#f29f05;color:#b07800}.bx.bajo{border-color:#2f8f7d;color:#1a7060}
+.it-meta{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.35}
+#map{height:calc(100vh - 24px);border-radius:var(--radius);border:1.5px solid var(--bdr);box-shadow:var(--shadow)}
+.pp{font-family:system-ui,sans-serif;min-width:260px}
+.pp h3{font-size:13px;font-weight:900;color:var(--g900);margin-bottom:5px}
+.nbp{display:inline-block;font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:999px;color:#fff;margin-bottom:5px}
+.nba{background:#d7263d}.nbm{background:#c88500}.nbb{background:#2f8f7d}
+.nbh{background:#e05c00}.nbbo{background:#c81d1d}.nbpl{background:#1565c0}.nbg{background:#0077b6}
+.ri{display:flex;gap:6px;margin:4px 0;font-size:11px}
+.ri b{color:var(--g900);white-space:nowrap;min-width:68px;font-size:10.5px}
+.ptags{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0}
+.tg{font-size:9.5px;padding:2px 6px;border-radius:999px;border:1px solid;font-weight:600}
+.tok{background:#e9f4f1;color:#1a7060;border-color:#a8d8ce}.twn{background:#fff8e6;color:#7a5200;border-color:#f5d87a}.tbd{background:#fdf0f1;color:#8c1a25;border-color:#f5b4bb}
+.ddb{background:#f6faf9;border:1px solid var(--bdr);border-radius:8px;padding:6px 9px;font-size:10.5px;line-height:1.45;margin:5px 0}
+.ccb{background:#fffbf0;border:1px solid #f5d87a;border-radius:8px;padding:6px 9px;font-size:10.5px;line-height:1.45;margin:5px 0;color:#5a3e00}
+.cct{font-size:9.5px;color:#aaa;margin-top:3px}
+.bm{display:inline-block;margin-top:7px;padding:7px 14px;border-radius:9px;text-decoration:none;color:#fff;background:var(--g800);font-size:11px;font-weight:800}
+.bm:hover{background:var(--g900)}
+.pfoto{max-width:100%;border-radius:8px;margin:5px 0;border:1px solid var(--bdr)}
+.legend{background:#fff;border:1.5px solid var(--bdr);border-radius:12px;padding:9px 11px;box-shadow:var(--shadow);font-size:10.5px;max-width:175px}
+.legend .lt{font-weight:900;color:var(--g900);font-size:11px;margin-bottom:4px}
+.legend .lr{display:flex;align-items:center;gap:6px;margin:3px 0}
+.legend hr{border:none;border-top:1px solid var(--bdr);margin:5px 0}
+.desc-body{flex:1;overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+.desc-col{overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:11px}
+.desc-col:first-child{border-right:1px solid var(--bdr)}
+.sec{font-size:10px;font-weight:900;color:var(--g800);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.sec::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ic{border:1.5px solid var(--bdr);border-radius:10px;padding:9px 11px;background:#fff}
+.ic .lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+.ic .val{font-size:13px;font-weight:900;color:var(--g800);line-height:1.15}
+.ic .sub{font-size:9.5px;color:var(--muted);margin-top:2px;line-height:1.3}
+.tc{border:1.5px solid var(--bdr);border-radius:10px;overflow:hidden;background:#fff}
+.tc-h{padding:8px 11px;display:flex;align-items:center;gap:8px}
+.tc-n{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;color:#fff}
+.tc-t{font-size:11.5px;font-weight:800;flex:1}.tc-k{font-size:10px;color:var(--muted);font-weight:600}
+.tc-b{padding:8px 11px 10px;border-top:1px solid var(--bdr);font-size:10.5px;line-height:1.5;color:#2a3a38}
+.pills{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.pill{font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;border:1px solid}
+.pill-a{background:#fdf0f1;color:#a31d2e;border-color:rgba(215,38,61,.35)}
+.pill-m{background:#fffbf0;color:#b07800;border-color:rgba(242,159,5,.4)}
+.pill-b{background:#e9f4f1;color:#1a7060;border-color:rgba(47,143,125,.4)}
+.rec-i{padding:8px 11px;border-radius:9px;background:rgba(233,244,241,.7);border:1px solid rgba(20,82,71,.18);font-size:10.5px;line-height:1.5;color:#2a3a38}
+.chart-c{border:1.5px solid var(--bdr);border-radius:10px;padding:11px 13px;background:#fff;flex:1;display:flex;flex-direction:column;min-height:0}
+.ch-leg{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:10.5px;color:var(--muted)}
+.ch-leg span{display:flex;align-items:center;gap:4px}
+.ch-leg i{width:18px;height:2.5px;border-radius:2px;display:inline-block}
+.ch-wrap{position:relative;flex:1;min-height:160px}
+.pt-bar{padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;border-bottom:1.5px solid var(--bdr);flex-wrap:wrap;background:#fff}
+.pt-bar input[type=text]{width:220px;padding:7px 10px;border:1.5px solid var(--bdr);border-radius:10px;outline:none;font-size:12px;background:#fff}
+.pt-bar select{padding:7px 9px;border:1.5px solid var(--bdr);border-radius:10px;font-size:11.5px;background:#fff;outline:none;cursor:pointer}
+.pt-cnt{font-size:11px;font-weight:700;color:var(--muted);margin-left:auto;white-space:nowrap}
+.pt-cnt span{color:var(--g800)}
+.pt-wrap{flex:1;overflow:auto}
+.pt-t{width:100%;border-collapse:collapse;font-size:11.5px}
+.pt-t thead{position:sticky;top:0;z-index:5}
+.pt-t thead th{background:linear-gradient(135deg,var(--g900),var(--g700));color:#fff;padding:9px 12px;text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap}
+.pt-t tbody tr{border-bottom:1px solid var(--bdr);cursor:pointer}
+.pt-t tbody tr:hover{background:rgba(20,82,71,.04)}
+.pt-t td{padding:8px 12px;vertical-align:top;line-height:1.4}
+.pt-t td.tnm{font-weight:900;font-size:13px;color:var(--g800);width:44px;white-space:nowrap}
+.pt-t td.tdesc{max-width:270px;color:#2a3a38}.pt-t td.tctrl{max-width:250px;color:#5a3e00}.pt-t td.tvel{max-width:150px;color:var(--muted);font-size:10.5px}
+.nbpt{display:inline-block;font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:999px;color:#fff;white-space:nowrap}
+.nb-pt-a{background:#d7263d}.nb-pt-m{background:#c88500}.nb-pt-b{background:#2f8f7d}
+.tsm{font-size:9px;padding:2px 6px;border-radius:999px;border:1px solid;font-weight:600;white-space:nowrap;display:inline-block;margin:2px 1px}
+.ts-ok{background:#e9f4f1;color:#1a7060;border-color:#a8d8ce}.ts-wn{background:#fff8e6;color:#7a5200;border-color:#f5d87a}.ts-bd{background:#fdf0f1;color:#8c1a25;border-color:#f5b4bb}
+.gml{font-size:10px;color:var(--g700);text-decoration:none;font-weight:700;white-space:nowrap}
+.gml:hover{text-decoration:underline}
+@media (max-width:768px){
+  #s-mapa{grid-template-columns:1fr!important;grid-template-rows:auto 1fr;gap:8px;padding:8px;height:auto;min-height:100%}
+  .screen{height:auto;min-height:100vh;overflow:visible}
+  #s-desc,#s-puntos{padding:8px}
+  .panel{height:auto!important;min-height:0;border-radius:12px}
+  #map{height:55vh!important;min-height:260px;border-radius:12px}
+  .tabs{overflow-x:auto}.tb{padding:9px 12px;font-size:11px}
+  .row2{grid-template-columns:1fr}
+  .list{max-height:40vh;overflow-y:auto;flex:none}
+  .desc-body{grid-template-columns:1fr!important;overflow:visible;height:auto}
+  .desc-col{overflow:visible;padding:12px;border-right:none!important;border-bottom:1px solid var(--bdr)}
+  .ig{grid-template-columns:1fr 1fr}
+  .ch-wrap{min-height:200px!important;height:200px;flex:none}
+  .pt-t{min-width:700px}
+}
+@media(max-width:480px){.ig{grid-template-columns:1fr}.stats4{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div id="s-mapa" class="screen">
+  <div class="panel">
+    <div class="ph">
+      <h1>🗺 Rutograma — <span id="hdRuta"></span></h1>
+      <p class="sub"><b id="hdCliente"></b> · <span id="hdN"></span> puntos · <span id="hdKm"></span> · <span id="hdFecha"></span></p>
+    </div>
+    <div class="tabs">
+      <button class="tb on">🗺 Mapa de riesgo</button>
+      <button class="tb" onclick="go('desc')">📋 Descripción</button>
+      <button class="tb" onclick="go('puntos')">📍 Puntos de riesgo</button>
+    </div>
+    <div class="pb">
+      <div class="alerta" id="alertZonas"></div>
+      <div><label>🔍 Buscar</label><input id="q" type="text" placeholder="Ej: peatonal, obra, bifurcación…" oninput="render()"/></div>
+      <div class="row2">
+        <div><label>Nivel</label>
+          <div class="chips">
+            <div id="cA" class="chip on" onclick="tgl(this);render()"><span class="dot alto"></span>Alto</div>
+            <div id="cM" class="chip on" onclick="tgl(this);render()"><span class="dot medio"></span>Medio</div>
+            <div id="cB" class="chip on" onclick="tgl(this);render()"><span class="dot bajo"></span>Bajo</div>
+          </div></div>
+        <div><label>Tramo</label><select id="selT" onchange="render()"></select></div>
+      </div>
+      <div><label>Capas</label>
+        <div class="chips" id="poiTogs"></div></div>
+      <div class="stats4">
+        <div class="stat"><div class="k">Puntos</div><div id="sV" class="v v-n">0</div></div>
+        <div class="stat"><div class="k">⚠ Alto</div><div id="sA" class="v v-a">0</div></div>
+        <div class="stat"><div class="k">🟡 Medio</div><div id="sM" class="v v-m">0</div></div>
+        <div class="stat"><div class="k">✅ Bajo</div><div id="sB" class="v v-b">0</div></div>
+      </div>
+    </div>
+    <ul id="list" class="list"></ul>
+  </div>
+  <div id="map"></div>
+</div>
+
+<div id="s-desc" class="screen" style="display:none">
+  <div class="panel">
+    <div class="ph">
+      <h1>📋 Descripción — <span id="hdRuta2"></span></h1>
+      <p class="sub" id="hdSub2"></p>
+    </div>
+    <div class="tabs">
+      <button class="tb" onclick="go('mapa')">🗺 Mapa de riesgo</button>
+      <button class="tb on">📋 Descripción</button>
+      <button class="tb" onclick="go('puntos')">📍 Puntos de riesgo</button>
+    </div>
+    <div class="desc-body">
+      <div class="desc-col">
+        <div><div class="sec">📌 Datos generales</div><div class="ig" id="datosGen"></div></div>
+        <div><div class="sec">🛣️ Descripción por tramos</div><div id="tramoCards" style="display:flex;flex-direction:column;gap:8px"></div></div>
+      </div>
+      <div class="desc-col">
+        <div><div class="sec">🛡️ Recomendaciones generales</div><div id="recList" style="display:flex;flex-direction:column;gap:6px"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+          <div class="sec">📈 Nivel de riesgo por punto</div>
+          <div class="chart-c">
+            <div class="ch-leg"><span><i style="background:#a32d2d"></i> Alto (3)</span><span><i style="background:#ba7517"></i> Medio (2)</span><span><i style="background:#3b6d11"></i> Bajo (1)</span></div>
+            <div class="ch-wrap"><canvas id="dc"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="s-puntos" class="screen" style="display:none">
+  <div class="panel">
+    <div class="ph">
+      <h1>📍 Puntos de Riesgo — <span id="hdRuta3"></span></h1>
+      <p class="sub" id="hdSub3"></p>
+    </div>
+    <div class="tabs">
+      <button class="tb" onclick="go('mapa')">🗺 Mapa de riesgo</button>
+      <button class="tb" onclick="go('desc')">📋 Descripción</button>
+      <button class="tb on">📍 Puntos de riesgo</button>
+    </div>
+    <div class="pt-bar">
+      <input type="text" id="ptq" placeholder="🔍 Buscar…" oninput="rTabla()"/>
+      <select id="ptN" onchange="rTabla()"><option value="">Todos los niveles</option><option>Alto</option><option>Medio</option><option>Bajo</option></select>
+      <select id="ptT" onchange="rTabla()"></select>
+      <div class="pt-cnt">Mostrando <span id="ptC">0</span> de <span id="ptTot">0</span></div>
+    </div>
+    <div class="pt-wrap">
+      <table class="pt-t">
+        <thead><tr><th>Nº</th><th>Nivel</th><th>Tramo</th><th>Km</th><th>Velocidad</th><th>Descripción del riesgo</th><th>Medida preventiva</th><th>Infra</th><th>Coordenadas</th></tr></thead>
+        <tbody id="ptBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""><\/script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>
+<script>
+const META = @@META@@;
+const RISK = @@RISK@@;
+const POIS = @@POIS@@;
+const ZMAN = @@ZONAS@@;
+
+const NT = Math.max(1, +(META.ntramos||4));
+const NLV = {Alto:3,Medio:2,Bajo:1};
+// Asignación de tramo por orden de captura en NT grupos iguales
+RISK.forEach((p,i)=>{ p._i=i; });
+function tramoOf(p){ const n=RISK.length||1; return Math.min(NT, Math.floor(p._i / (n/NT)) + 1); }
+const TRAMOS=[];
+for(let t=1;t<=NT;t++){
+  const ps=RISK.filter(p=>tramoOf(p)===t);
+  const kms=ps.map(p=>parseFloat(p.km)).filter(v=>!isNaN(v));
+  const ids=ps.map(p=>p.id);
+  let klbl='';
+  if(kms.length) klbl='km '+Math.min(...kms)+'–'+Math.max(...kms);
+  else if(ids.length) klbl='P'+Math.min(...ids)+'–P'+Math.max(...ids);
+  TRAMOS.push({n:t,ps,kms,ids,klbl,obs:(META.tramoObs&&META.tramoObs[t-1])||''});
+}
+const TC={1:'#145247',2:'#ba7517',3:'#a32d2d',4:'#7a1020',5:'#5b2d82',6:'#0e6b7d',7:'#8a5a00',8:'#334155'};
+const TLBL=t=>'T'+t+(TRAMOS[t-1]&&TRAMOS[t-1].klbl?' · '+TRAMOS[t-1].klbl:'');
+
+// Zonas críticas: manuales + autodetección de rachas de >=3 Alto consecutivos
+function autoZonas(){
+  const z=[...(ZMAN||[])]; let run=[];
+  const flush=()=>{ if(run.length>=3){ const la=run.reduce((a,p)=>a+p.lat,0)/run.length, lo=run.reduce((a,p)=>a+p.lon,0)/run.length;
+      let r=250; run.forEach(p=>{const d=Math.hypot((p.lat-la)*111000,(p.lon-lo)*111000*Math.cos(la*Math.PI/180)); if(d>r)r=d;});
+      z.push([la,lo,Math.max(r+120,300),'⚠ Zona: P'+run[0].id+'–P'+run[run.length-1].id+' · '+run.length+' puntos Alto agrupados']); } run=[]; };
+  RISK.forEach(p=>{ if(p.nivel==='Alto') run.push(p); else flush(); }); flush();
+  return z;
+}
+const ZONAS=autoZonas();
+
+function esc(s){return(s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ===== Header / metadatos =====
+const nAlto=RISK.filter(p=>p.nivel==='Alto').length, nMed=RISK.filter(p=>p.nivel==='Medio').length, nBaj=RISK.filter(p=>p.nivel==='Bajo').length;
+document.getElementById('hdRuta').textContent=META.ruta||'Ruta';
+document.getElementById('hdRuta2').textContent=META.ruta||'Ruta';
+document.getElementById('hdRuta3').textContent=META.ruta||'Ruta';
+document.getElementById('hdCliente').textContent=META.cliente||'Cliente';
+document.getElementById('hdN').textContent=RISK.length;
+document.getElementById('hdKm').textContent=(META.km?('~'+META.km+' km'):(RISK.length+' pts'));
+document.getElementById('hdFecha').textContent=META.fecha||'';
+const sub2=(META.cliente||'')+' · '+(META.km?('~'+META.km+' km'):'')+' · '+(META.tiempo?('Duración: '+META.tiempo+' · '):'')+'Fecha: '+(META.fecha||'—');
+document.getElementById('hdSub2').textContent=sub2;
+document.getElementById('hdSub3').textContent=RISK.length+' puntos georeferenciados · '+(META.cliente||'')+' · '+(META.fecha||'');
+document.getElementById('ptTot').textContent=RISK.length;
+if(ZONAS.length){document.getElementById('alertZonas').innerHTML='⚠️ <b>'+ZONAS.length+' zona(s) crítica(s) detectada(s):</b> '+ZONAS.map(z=>z[3].replace('⚠ Zona: ','')).join(' · ');}
+else{document.getElementById('alertZonas').innerHTML='✅ Sin agrupaciones críticas (rachas de 3+ puntos Alto) detectadas automáticamente.';}
+
+// selects de tramo
+const selT=document.getElementById('selT'), ptT=document.getElementById('ptT');
+selT.innerHTML='<option value="">Todos</option>'+TRAMOS.map(t=>'<option value="'+t.n+'">'+TLBL(t.n)+'</option>').join('');
+ptT.innerHTML='<option value="">Todos los tramos</option>'+TRAMOS.map(t=>'<option value="'+t.n+'">'+TLBL(t.n)+'</option>').join('');
+
+// ===== Mapa =====
+function go(v){
+  document.getElementById('s-mapa').style.display=v==='mapa'?'grid':'none';
+  document.getElementById('s-desc').style.display=v==='desc'?'block':'none';
+  document.getElementById('s-puntos').style.display=v==='puntos'?'block':'none';
+  if(v==='mapa')setTimeout(()=>map.invalidateSize(),80);
+  if(v==='desc'){buildDesc();setTimeout(()=>{if(!window._dc)dchart();},120);}
+  if(v==='puntos')rTabla();
+}
+function tgl(el){el.classList.toggle('on');}
+
+const map=L.map('map',{zoomControl:true});
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,attribution:'© OpenStreetMap © CARTO',subdomains:'abcd'}).addTo(map);
+function mkC(c,sz=14){return L.divIcon({className:'',iconSize:[sz+4,sz+4],iconAnchor:[(sz+4)/2,(sz+4)/2],html:'<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+c+';border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>'});}
+function mkE(em,sz=20){return L.divIcon({className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],html:'<div style="font-size:'+sz+'px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))">'+em+'</div>'});}
+const IC={Alto:mkC('#d7263d'),Medio:mkC('#f29f05'),Bajo:mkC('#2f8f7d'),hosp:mkE('🏥'),bomb:mkE('🚒'),pol:mkE('👮'),gas:mkE('⛽')};
+const clR=L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:35});
+const LYR={hosp:L.layerGroup(),bomb:L.layerGroup(),pol:L.layerGroup(),gas:L.layerGroup()};
+const MR=[];
+const POINAME={hosp:'Hospital / Salud',bomb:'Bomberos',pol:'Policía',gas:'Estación Servicio'};
+const POIEMO={hosp:'🏥',bomb:'🚒',pol:'👮',gas:'⛽'};
+
+function popR(p){
+  const gm='https://www.google.com/maps?q='+p.lat+','+p.lon;
+  const nb=p.nivel==='Alto'?'nba':p.nivel==='Medio'?'nbm':'nbb';
+  const ec=(p.est==='Buena'||p.est==='Bueno')?'tok':p.est==='Regular'?'twn':'tbd';
+  const ic=p.ilum==='Buena'?'tok':p.ilum==='Regular'?'twn':'tbd';
+  const vel=p.veld||p.velo?('Diseño '+(p.veld||'—')+' / Operación '+(p.velo||'—')+' km/h'):(p.vel||'');
+  return '<div class="pp"><h3>Punto '+esc(p.id)+(p.km!==''&&p.km!=null?(' · km '+esc(p.km)):'')+'</h3><span class="nbp '+nb+'">Riesgo '+esc(p.nivel)+'</span>'
+    +(vel?'<div class="ri"><b>Velocidad:</b><span>'+esc(vel)+'</span></div>':'')
+    +'<div class="ptags"><span class="tg '+ec+'">Estado: '+esc(p.est||'—')+'</span>'+(p.mat?'<span class="tg tok">'+esc(p.mat)+'</span>':'')+'<span class="tg '+(p.senV==='Sí'?'tok':p.senV==='Parcial'?'twn':'tbd')+'">Señal.V: '+esc(p.senV||'—')+'</span><span class="tg '+(p.senH==='Sí'?'tok':p.senH==='Parcial'?'twn':'tbd')+'">Señal.H: '+esc(p.senH||'—')+'</span><span class="tg '+ic+'">Ilum: '+esc(p.ilum||'—')+'</span></div>'
+    +((p.senVList&&p.senVList.length)?'<div class="ri"><b>Señales verticales:</b><span>'+esc(p.senVList.join(', '))+'</span></div>':'')
+    +((p.senVReq&&p.senVReq.length)?'<div class="ri"><b>Señales verticales requeridas:</b><span>'+esc(p.senVReq.join(', '))+'</span></div>':'')
+    +((p.senHList&&p.senHList.length)?'<div class="ri"><b>Señales horizontales:</b><span>'+esc(p.senHList.join(', '))+'</span></div>':'')
+    +((p.senHReq&&p.senHReq.length)?'<div class="ri"><b>Señales horizontales requeridas:</b><span>'+esc(p.senHReq.join(', '))+'</span></div>':'')
+    +(p.foto?'<img class="pfoto" src="'+p.foto+'"/>':'')
+    +'<div class="ddb">📋 <b>Descripción:</b><br>'+esc(p.desc)+'</div>'
+    +'<div class="ccb">⚠ <b>Medida preventiva:</b><br>'+esc(p.ctrl)+'</div>'
+    +'<div class="cct">📍 '+p.lat+', '+p.lon+'</div>'
+    +'<a class="bm" href="'+gm+'" target="_blank" rel="noopener">Ver en Google Maps</a></div>';
+}
+function popPOI(p){
+  const cl={hosp:'nbh',bomb:'nbbo',pol:'nbpl',gas:'nbg'};
+  const gm='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((p.nom||'')+' Colombia');
+  return '<div class="pp"><h3>'+POIEMO[p.tipo]+' '+esc(p.nom)+'</h3><span class="nbp '+cl[p.tipo]+'">'+esc(POINAME[p.tipo])+'</span>'
+    +(p.dir?'<div class="ri"><b>Dirección:</b><span>'+esc(p.dir)+'</span></div>':'')
+    +(p.tel&&p.tel!=='—'?'<div class="ri"><b>Teléfono:</b><span>'+esc(p.tel)+'</span></div>':'')
+    +(p.nota?'<div class="ddb">'+esc(p.nota)+'</div>':'')
+    +'<a class="bm" href="'+gm+'" target="_blank" rel="noopener">Ver en Google Maps</a></div>';
+}
+POIS.forEach(p=>{ if(LYR[p.tipo]) L.marker([p.lat,p.lon],{icon:IC[p.tipo]}).bindPopup(popPOI(p),{maxWidth:340}).addTo(LYR[p.tipo]); });
+// toggles de POIs solo para tipos presentes
+const presentes=[...new Set(POIS.map(p=>p.tipo))];
+const emo={hosp:'🏥 Hospitales',bomb:'🚒 Bomberos',pol:'👮 Policía',gas:'⛽ Est. Servicio'};
+document.getElementById('poiTogs').innerHTML = presentes.length? presentes.map(t=>'<div class="chip on" data-poi="'+t+'" onclick="togPoi(this)"><span class="dot '+t+'"></span>'+emo[t]+'</div>').join('') : '<span style="font-size:10.5px;color:var(--muted)">Sin POIs cargados</span>';
+function togPoi(el){const t=el.dataset.poi;el.classList.toggle('on');if(el.classList.contains('on'))LYR[t].addTo(map);else map.removeLayer(LYR[t]);}
+presentes.forEach(t=>LYR[t].addTo(map));
+
+function getFil(){
+  const q=document.getElementById('q').value.toLowerCase().trim();
+  const tv=document.getElementById('selT').value;
+  const fA=document.getElementById('cA').classList.contains('on'),fM=document.getElementById('cM').classList.contains('on'),fB=document.getElementById('cB').classList.contains('on');
+  return RISK.filter(p=>{
+    if(p.nivel==='Alto'&&!fA)return false; if(p.nivel==='Medio'&&!fM)return false; if(p.nivel==='Bajo'&&!fB)return false;
+    if(tv&&tramoOf(p)!=tv)return false;
+    if(!q)return true;
+    return (p.id+' '+p.nivel+' '+p.desc+' '+p.ctrl+' '+(p.est||'')).toLowerCase().includes(q);
+  });
+}
+function render(){
+  const fil=getFil();
+  document.getElementById('sV').textContent=fil.length;
+  document.getElementById('sA').textContent=fil.filter(p=>p.nivel==='Alto').length;
+  document.getElementById('sM').textContent=fil.filter(p=>p.nivel==='Medio').length;
+  document.getElementById('sB').textContent=fil.filter(p=>p.nivel==='Bajo').length;
+  clR.clearLayers();MR.length=0;
+  fil.forEach((p,i)=>{const m=L.marker([p.lat,p.lon],{icon:IC[p.nivel]});m.bindPopup(popR(p),{maxWidth:380});m.on('click',()=>hlI(i));MR.push(m);clR.addLayer(m);});
+  if(!map.hasLayer(clR))map.addLayer(clR);
+  if(window._rl)map.removeLayer(window._rl);
+  if(RISK.length>1)window._rl=L.polyline(RISK.map(p=>[p.lat,p.lon]),{color:'#145247',weight:2.5,opacity:.35,dashArray:'7 5'}).addTo(map);
+  if(window._zcs)window._zcs.forEach(z=>map.removeLayer(z));
+  window._zcs=ZONAS.map(z=>L.circle([z[0],z[1]],{radius:z[2],color:'#d7263d',fillColor:'#d7263d',fillOpacity:.08,weight:1.5,dashArray:'5 4'}).addTo(map).bindTooltip(z[3]));
+  if(fil.length)map.fitBounds(L.latLngBounds(fil.map(p=>[p.lat,p.lon])).pad(0.08));
+  const ul=document.getElementById('list');
+  ul.innerHTML=fil.map((p,i)=>{const bc=p.nivel.toLowerCase();const sh=p.senH==='No'?'<span style="font-size:9px;background:#fdf0f1;color:#8c1a25;border:1px solid #f5b4bb;border-radius:999px;padding:1px 5px;font-weight:700;margin-left:4px">Sin SH</span>':'';
+    return '<li class="item" data-i="'+i+'"><div class="it"><span class="it-ttl">P'+esc(p.id)+sh+'</span><span class="bx '+bc+'">'+esc(p.nivel)+'</span></div><div class="it-meta">'+esc((p.desc||'').substring(0,105))+((p.desc||'').length>105?'…':'')+'</div></li>';}).join('');
+  ul.querySelectorAll('.item').forEach(li=>li.addEventListener('click',()=>{const i=+li.dataset.i,p=fil[i];if(!p)return;map.setView([p.lat,p.lon],Math.max(map.getZoom(),14));MR[i]&&MR[i].openPopup();hlI(i);}));
+}
+function hlI(i){document.querySelectorAll('.item').forEach(el=>el.classList.remove('hl'));const el=document.querySelector('.item[data-i="'+i+'"]');if(el){el.classList.add('hl');el.scrollIntoView({behavior:'smooth',block:'nearest'});}}
+function lblM(la,lo,bg,txt,ax){return L.marker([la,lo],{icon:L.divIcon({className:'',iconAnchor:ax,html:'<div style="background:'+bg+';color:#fff;font-size:11px;font-weight:900;padding:5px 10px;border-radius:8px;border:2px solid #fff;box-shadow:0 2px 9px rgba(0,0,0,.35);white-space:nowrap">'+txt+'</div>'})});}
+if(META.orig&&META.orig.lat)lblM(+META.orig.lat,+META.orig.lon,'#145247','🏭 INICIO '+(META.orig.nom||'')).addTo(map).bindPopup('<b>INICIO</b><br>'+esc(META.orig.nom||''));
+if(META.dest&&META.dest.lat)lblM(+META.dest.lat,+META.dest.lon,'#d7263d','🏁 DESTINO '+(META.dest.nom||'')).addTo(map).bindPopup('<b>DESTINO</b><br>'+esc(META.dest.nom||''));
+
+const leg=L.control({position:'bottomright'});
+leg.onAdd=function(){const d=L.DomUtil.create('div','legend');
+  d.innerHTML='<div class="lt">Leyenda</div><div class="lr"><span class="dot alto"></span> Alto ('+nAlto+')</div><div class="lr"><span class="dot medio"></span> Medio ('+nMed+')</div><div class="lr"><span class="dot bajo"></span> Bajo ('+nBaj+')</div>'
+    +(presentes.length?'<hr>'+presentes.map(t=>'<div class="lr">'+POIEMO[t]+' '+POINAME[t]+'</div>').join(''):'')
+    +'<hr><div style="font-size:9.5px;color:var(--muted)">Click → detalle + Google Maps</div>'+(ZONAS.length?'<div style="margin-top:3px;font-size:9.5px;color:#a31d2e">⬤ Círculos = Zonas críticas</div>':'');
+  return d;};
+leg.addTo(map);
+render();
+
+// ===== Descripción =====
+function buildDesc(){
+  const dg=document.getElementById('datosGen');
+  dg.innerHTML=''
+    +ic('Cliente',META.cliente||'—','')
+    +ic('Fecha de ejecución',META.fecha||'—',META.consultor?('Consultor: '+META.consultor):'')
+    +ic('Origen',(META.orig&&META.orig.nom)||'—',(META.orig&&META.orig.lat)?(META.orig.lat+', '+META.orig.lon):'')
+    +ic('Destino',(META.dest&&META.dest.nom)||'—',(META.dest&&META.dest.lat)?(META.dest.lat+', '+META.dest.lon):'')
+    +ic('Distancia',(META.km?('~'+META.km+' km'):'—'),RISK.length+' puntos GPS')
+    +ic('Duración',META.tiempo||'—','')
+    +ic('Riesgo',nAlto+' Alto · '+nMed+' Medio · '+nBaj+' Bajo',ZONAS.length+' zona(s) crítica(s))');
+  const cont=document.getElementById('tramoCards');
+  cont.innerHTML=TRAMOS.map(t=>{
+    const a=t.ps.filter(p=>p.nivel==='Alto').length,m=t.ps.filter(p=>p.nivel==='Medio').length,b=t.ps.filter(p=>p.nivel==='Bajo').length;
+    const bg=t.n===1?'#e9f4f1':(a>=3?'#fdf0f1':'#fff8e6');
+    const auto='Tramo con '+t.ps.length+' punto(s) ('+a+' Alto, '+m+' Medio, '+b+' Bajo)'+(t.klbl?', '+t.klbl:'')+'. Resumen automático — sin observación del consultor registrada.';
+    const body=t.obs?esc(t.obs):('<i style="color:var(--muted)">'+auto+'</i>');
+    return '<div class="tc"><div class="tc-h" style="background:'+bg+'"><div class="tc-n" style="background:'+(TC[t.n]||'#334155')+'">'+t.n+'</div><div class="tc-t">Tramo '+t.n+'</div><div class="tc-k">'+esc(t.klbl||'')+' · '+t.ps.length+' pts</div></div><div class="tc-b">'+body+'<div class="pills"><span class="pill pill-b">'+b+' Bajo</span><span class="pill pill-m">'+m+' Medio</span><span class="pill pill-a">'+a+' Alto</span></div></div></div>';
+  }).join('');
+  const rl=document.getElementById('recList');
+  let recs=(META.recs||[]).filter(x=>x&&x.trim());
+  if(!recs.length){recs=[
+    'Emergencias: '+((META.emerg||[]).map(e=>e.nom+': '+e.tel).join(' · ')||'Policía 123 · Bomberos 119 · Defensa Civil 144'),
+    'Sin distractores: prohibido el celular en todo el recorrido; ambas manos al volante en los '+nAlto+' puntos Alto.',
+    'Reducir velocidad de forma anticipada en cada punto marcado y respetar la señalización temporal de obras.'
+  ];}
+  rl.innerHTML=recs.map(r=>'<div class="rec-i">• '+esc(r)+'</div>').join('');
+}
+function ic(l,v,s){return '<div class="ic"><div class="lbl">'+esc(l)+'</div><div class="val">'+esc(v)+'</div>'+(s?'<div class="sub">'+esc(s)+'</div>':'')+'</div>';}
+
+function dchart(){
+  const isDark=matchMedia('(prefers-color-scheme: dark)').matches;
+  const gC=isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)',tC=isDark?'#aaa':'#666';
+  const NVC={1:'#3b6d11',2:'#ba7517',3:'#a32d2d'};
+  if(window._dc)window._dc.destroy();
+  window._dc=new Chart(document.getElementById('dc'),{type:'line',
+    data:{labels:RISK.map(p=>'P'+p.id),datasets:[{data:RISK.map(p=>NLV[p.nivel]),borderColor:'#378add',borderWidth:2,tension:.3,fill:true,backgroundColor:'rgba(55,138,221,.06)',pointBackgroundColor:RISK.map(p=>NVC[NLV[p.nivel]]),pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:RISK.length>40?3:5,pointHoverRadius:7}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>c[0].label,label:c=>' '+RISK[c[0].dataIndex].nivel+' ('+c.raw+'/3)'}}},scales:{x:{ticks:{color:tC,font:{size:9.5},maxTicksLimit:15,maxRotation:45,autoSkip:true},grid:{color:gC}},y:{min:.5,max:3.5,ticks:{stepSize:1,color:tC,callback:v=>v===1?'Bajo':v===2?'Medio':v===3?'Alto':''},grid:{color:gC}}}}});
+}
+
+// ===== Tabla =====
+const NPC={Alto:'nb-pt-a',Medio:'nb-pt-m',Bajo:'nb-pt-b'};
+function tcl(v){return(v==='Buena'||v==='Bueno')?'ts-ok':v==='Regular'?'ts-wn':'ts-bd';}
+function rTabla(){
+  const q=(document.getElementById('ptq').value||'').toLowerCase().trim();
+  const nv=document.getElementById('ptN').value,tr=document.getElementById('ptT').value;
+  const fil=RISK.filter(p=>{if(nv&&p.nivel!==nv)return false;if(tr&&tramoOf(p)!=tr)return false;if(!q)return true;return (p.id+' '+p.nivel+' '+p.desc+' '+p.ctrl+' '+(p.est||'')).toLowerCase().includes(q);});
+  document.getElementById('ptC').textContent=fil.length;
+  document.getElementById('ptBody').innerHTML=fil.map(p=>{
+    const gm='https://www.google.com/maps?q='+p.lat+','+p.lon;const tn=tramoOf(p);
+    const vel=(p.veld||p.velo)?('D'+(p.veld||'—')+'/O'+(p.velo||'—')):(p.vel||'');
+    const shT=p.senH==='No'?'<span class="tsm ts-bd">Sin SH</span>':'<span class="tsm ts-ok">SH ✓</span>';
+    const rT='<span class="tsm '+tcl(p.est)+'">'+esc(p.est||'—')+'</span>';
+    return '<tr><td class="tnm">'+esc(p.id)+'</td><td><span class="nbpt '+NPC[p.nivel]+'">'+esc(p.nivel)+'</span></td><td style="font-size:10.5px;font-weight:700;color:'+(TC[tn]||'#334155')+';white-space:nowrap">'+esc(TLBL(tn))+'</td><td>'+esc(p.km!=null?p.km:'')+'</td><td class="tvel">'+esc(vel)+'</td><td class="tdesc">'+esc(p.desc)+'</td><td class="tctrl">'+esc(p.ctrl)+'</td><td style="white-space:nowrap">'+rT+shT+'</td><td style="white-space:nowrap;font-size:10px"><div>'+(+p.lat).toFixed(5)+',</div><div>'+(+p.lon).toFixed(5)+'</div><a class="gml" href="'+gm+'" target="_blank" rel="noopener">📍 Ver mapa</a></td></tr>';
+  }).join('');
+}
+<\/script>
+</body>
+</html>
+
+</script>
+
+<script>
+/* ================= ESTADO ================= */
+const LS_KEY='rutograma_capture_v1';
+let P={meta:{},points:[],pois:[],emerg:[]};
+let editId=null, tmpFoto=null, manualNivel=null, armed=true;
+
+const MTX={
+  Alta:{'Muy probable':3,'Probable':2,'Poco probable':2},
+  Media:{'Muy probable':3,'Probable':2,'Poco probable':1},
+  Baja:{'Muy probable':2,'Probable':1,'Poco probable':1}
+};
+const VAL_WORD={3:'Crítico',2:'Importante',1:'Moderado'};
+const NIV_FROM={3:'Alto',2:'Medio',1:'Bajo'};
+const NIV_TO={Alto:3,Medio:2,Bajo:1};
+
+const DEF_EMERG=[
+  {nom:'Policía de carreteras',tel:'#767'},
+  {nom:'Bomberos',tel:'#119'},
+  {nom:'Defensa Civil',tel:'#144'},
+  {nom:'Cruz Roja',tel:'#132'},
+  {nom:'Gaula',tel:'#147 ó #156'},
+  {nom:'Línea única de emergencias',tel:'123'}
+];
+/* Peligros agrupados por factores de desempeño de seguridad vial (ISO 39001:2012, cláusula 6.3 c) */
+const QP_DESC=[
+  ['Diseño y trazado de la vía',['Curva con visibilidad reducida','Pendiente pronunciada (ascenso/descenso)','Bifurcación sin señalización','Intersección sin canalizar','Berma inexistente o deteriorada','Talud o zona lateral sin protección','Reducción brusca de carril','Fin de doble calzada']],
+  ['Usuarios vulnerables y separación',['Alto flujo de peatones','Cruce peatonal sin demarcar','Zona escolar','Flujo de ciclistas sin carril segregado','Alta presencia de motociclistas','Cruce o pastoreo de semovientes','Paradero informal sobre la calzada']],
+  ['Estado de la superficie',['Huecos o baches en la calzada','Hundimiento de la vía','Faltante de calzada / borde socavado','Pérdida de bermas','Encharcamiento / drenaje deficiente','Tramo destapado o en afirmado','Material suelto o gravilla']],
+  ['Señalización y visibilidad',['Sin demarcación horizontal','Sin señalización vertical','Señalización deteriorada o cubierta','Iluminación deficiente','Vegetación que invade la vía o tapa señales','Deslumbramiento por sol bajo']],
+  ['Entrada / salida a la vía y actividad lateral',['Ingreso y salida de vehículos pesados','Entrada/salida de maquinaria agrícola','Accesos a predios o comercios','Vehículos estacionados sobre la calzada','Zona de obra / reducción de carril','Retorno sin carril de desaceleración']],
+  ['Velocidad y entorno',['Tramo recto que induce exceso de velocidad','Zona de adelantamiento riesgoso','Zona de derrumbes / inestabilidad','Cruce de fauna','Neblina frecuente','Parador turístico con alto flujo']],
+];
+/* Medidas de control alineadas a los mismos factores de desempeño (ISO 39001:2012) */
+const QP_CTRL=[
+  ['Velocidad segura',['Reducir a 30 km/h.','Reducir a 50 km/h.','Reducir la velocidad con anticipación.','Adecuar la velocidad al clima y la visibilidad.']],
+  ['Separación y usuarios vulnerables',['Ceder el paso a los peatones.','Mantener distancia lateral con ciclistas y motos.','Extremar precaución en zona escolar.','Precaución con semovientes en la vía.','No invadir el carril contrario.']],
+  ['Ver y ser visto',['Encender luces de cruce.','Anticipar las señales de giro.','Pitar antes de curva sin visibilidad.']],
+  ['Obras y actividad lateral',['No adelantar en zona de obra.','Atender la señalización temporal.','Aumentar la distancia de seguimiento.','Precaución por ingreso de vehículos pesados.','Detener la marcha si es necesario.']],
+  ['Aptitud del conductor',['No usar el celular ni distractores.','Mantener ambas manos en el volante.','Hacer pausa activa si hay fatiga.','Conducir de forma preventiva y defensiva.']],
+  ['Vehículo y protección',['Verificar el uso del cinturón de seguridad.','Asegurar la carga antes de continuar.']],
+  ['Planificación y respuesta',['Confirmar ruta y comunicación antes del tramo.','Tener a mano los números de emergencia.']],
+];
+
+/* ================= UTIL ================= */
+function $(id){return document.getElementById(id);}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+function sav(){localStorage.setItem(LS_KEY,JSON.stringify(P));$('saveState').textContent='✓ Guardado '+new Date().toLocaleTimeString().slice(0,5);}
+function load(){try{const r=localStorage.getItem(LS_KEY);if(r)P=JSON.parse(r);}catch(e){}}
+function dl(name,content,type){const b=new Blob([content],{type:type||'text/plain;charset=utf-8'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
+function sane(s){return (s||'').toString().replace(/[^\w\-áéíóúñ ]/gi,'').trim().replace(/\s+/g,'_').slice(0,40)||'rutograma';}
+
+/* ================= TABS ================= */
+function tab(s){
+  document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+  document.querySelectorAll('.sect').forEach(x=>x.classList.remove('on'));
+  $('s-'+s).classList.add('on');
+  const capTab=(s==='cap');
+  $('fabSave').style.display=capTab?'flex':'none';
+  if(s==='pts')renderPts();
+  if(s==='gen')checkGen();
+  if(s==='emg')renderEmg();
+  window.scrollTo(0,0);
+}
+
+/* ================= GPS ================= */
+/* Diagnóstico de errores GPS por código estándar W3C Geolocation API */
+function gpsErrMsg(err){
+  if(err.code===1)return 'Permiso denegado. Ve a Ajustes del navegador → Permisos del sitio → Ubicación → Permitir, y recarga.';
+  if(err.code===2)return 'Posición no disponible. Verifica que el GPS del teléfono esté ENCENDIDO (deslizar barra superior) y sal a cielo abierto.';
+  if(err.code===3)return 'Tiempo agotado. El GPS tarda en enganchar señal (hasta 60s en primer uso). Reintenta al aire libre.';
+  return 'Error desconocido ('+(err.message||'sin detalle')+')';
+}
+
+/* Muestra error en el cuadro visible, no solo toast (para que quede leíble en campo) */
+function showGpsErr(msg){
+  const o=$('gpsOut');
+  if(o){o.className='gps-out show gps-err';o.innerHTML='⚠ '+msg;}
+  toast('GPS: '+msg.substring(0,60));
+}
+
+function gps(cb){
+  /* 1. Verificar soporte del API */
+  if(!navigator.geolocation){
+    showGpsErr('Este navegador no soporta geolocalización. Usa Chrome o Firefox actualizado.');
+    return;
+  }
+  /* 2. Verificar contexto seguro (HTTPS/localhost/file://).
+        Chrome Android bloquea geolocation en HTTP plano desde 2018. */
+  if(typeof window.isSecureContext!=='undefined' && !window.isSecureContext){
+    showGpsErr('El GPS requiere HTTPS. Abre este archivo desde el almacenamiento local (file://) o súbelo a un servidor HTTPS.');
+    return;
+  }
+  toast('Obteniendo GPS… (puede tardar hasta 30s)');
+
+  /* 3. Primer intento: alta precisión, 30s timeout */
+  const optHigh={enableHighAccuracy:true,timeout:30000,maximumAge:0};
+  /* 4. Fallback: baja precisión (red/celda), 15s timeout — solo si el primero falla por timeout o no disponible */
+  const optLow={enableHighAccuracy:false,timeout:15000,maximumAge:60000};
+
+  navigator.geolocation.getCurrentPosition(
+    pos=>cb(pos.coords.latitude,pos.coords.longitude,pos.coords.accuracy),
+    err=>{
+      /* Si es permiso denegado (código 1), no reintentar */
+      if(err.code===1){showGpsErr(gpsErrMsg(err));return;}
+      /* Códigos 2 y 3: reintentar con baja precisión */
+      toast('Reintentando con precisión reducida…');
+      navigator.geolocation.getCurrentPosition(
+        pos=>cb(pos.coords.latitude,pos.coords.longitude,pos.coords.accuracy),
+        err2=>showGpsErr(gpsErrMsg(err2)),
+        optLow
+      );
+    },
+    optHigh
+  );
+}
+function gpsTo(latId,lonId){gps((la,lo)=>{$(latId).value=la.toFixed(6);$(lonId).value=lo.toFixed(6);saveMeta();toast('Coordenada capturada');});}
+function capGPS(){
+  gps((la,lo,acc)=>{
+    $('c_lat').value=la.toFixed(6);$('c_lon').value=lo.toFixed(6);
+    const o=$('gpsOut');o.className='gps-out show';
+    o.innerHTML='📍 '+la.toFixed(6)+', '+lo.toFixed(6)+' <span class="acc">(precisión ±'+Math.round(acc)+' m)</span>';
+    if(acc>30)o.innerHTML+='<br><span class="acc" style="color:#a31d2e">⚠ Precisión baja, espera unos segundos y reintenta.</span>';
+  });
+}
+
+/* ================= MATRIZ ================= */
+function calcVal(){
+  const sev=$('c_sev').value, prob=$('c_prob').value;
+  const v=MTX[sev][prob];
+  manualNivel=null; // recomputar borra override
+  paintNivel(NIV_FROM[v],v);
+}
+function setNivel(n){manualNivel=n;paintNivel(n,NIV_TO[n]);}
+function paintNivel(niv,v){
+  $('valLbl').textContent=niv.toUpperCase();
+  $('valLbl').className='vl va-'+v;
+  $('valWord').textContent=VAL_WORD[v];
+  $('valNum').textContent=v;
+  ['Alto','Medio','Bajo'].forEach(x=>{const c=$('ch'+x);c.className='chip'+(x===niv?(' on-'+x.toLowerCase()):'');});
+}
+function curNivel(){return manualNivel||NIV_FROM[MTX[$('c_sev').value][$('c_prob').value]];}
+
+/* ================= QUICK PICKS ================= */
+function buildQP(){
+  const mk=(host,groups,target)=>{
+    host.querySelectorAll('.qp-g,.qp-x').forEach(e=>e.remove());
+    groups.forEach(([g,items])=>{
+      const h=document.createElement('div');h.className='qp-g';h.textContent=g;host.appendChild(h);
+      items.forEach(t=>{const s=document.createElement('span');s.className='qp-x';s.textContent=t;s.onclick=()=>appendTA(target,t);host.appendChild(s);});
+    });
+  };
+  mk($('qpDesc'),QP_DESC,'c_desc');
+  mk($('qpCtrl'),QP_CTRL,'c_ctrl');
+}
+function appendTA(id,t){const el=$(id);const cur=el.value.trim();el.value=cur?(cur+(/[.;]$/.test(cur)?' ':'. ')+t):t;}
+
+/* ============ SEÑALIZACIÓN (¿cuáles?) ============ */
+const SIGN_V=['Pare','Ceda el paso','No gire','Sentido vial','No adelantar','Velocidad máxima','Paso peatonal','Semovientes en la vía'];
+const SIGN_H=['Zona peatonal','Línea de pare','Línea central amarilla continua o segmentada','Línea de carril blanca continua o segmentada','Línea de borde','Flechas','Leyendas','Símbolos','Reductores de velocidad','Bandas alertadoras','Resaltos','Estóperol','Pompeyano','Parabólico'];
+function buildSignChips(){
+  const mk=(host,arr)=>{host.innerHTML='';arr.forEach(t=>{const s=document.createElement('span');s.textContent=t;s.onclick=()=>s.classList.toggle('sel');host.appendChild(s);});};
+  mk($('chSenV'),SIGN_V);mk($('chSenH'),SIGN_H);
+  mk($('chReqV'),SIGN_V);mk($('chReqH'),SIGN_H);
+}
+function getChips(id){return [...$(id).querySelectorAll('span.sel')].map(s=>s.textContent);}
+function setChips(id,arr){arr=arr||[];[...$(id).querySelectorAll('span')].forEach(s=>s.classList.toggle('sel',arr.includes(s.textContent)));}
+function collectSel(chipId,otraId){const list=getChips(chipId);const otra=$(otraId).value.trim();if(otra)list.push('Otras: '+otra);return list;}
+function loadSel(chipId,otraId,arr){arr=arr||[];const otra=arr.find(x=>x.indexOf('Otras: ')===0);setChips(chipId,arr.filter(x=>x.indexOf('Otras: ')!==0));$(otraId).value=otra?otra.slice(7):'';}
+/* Señales PRESENTES si "Sí" marcado; REQUERIDAS si "No" marcado (independientes) */
+function signPresent(k){return $('c_sen'+k+'_si').checked?collectSel('chSen'+k,'c_sen'+k+'_otra'):[];}
+function signRequired(k){return $('c_sen'+k+'_no').checked?collectSel('chReq'+k,'c_sen'+k+'_req_otra'):[];}
+function existeSign(k){const si=$('c_sen'+k+'_si').checked,no=$('c_sen'+k+'_no').checked;return si&&no?'Parcial':si?'Sí':no?'No':'—';}
+function toggleCuales(k){
+  $('wrapSen'+k).style.display=$('c_sen'+k+'_si').checked?'block':'none';
+  $('wrapReq'+k).style.display=$('c_sen'+k+'_no').checked?'block':'none';
+}
+
+/* ============ DESTINO = último punto capturado ============ */
+function syncDestino(){
+  if(!P.points.length)return;
+  const last=P.points[P.points.length-1];
+  P.meta.dest=P.meta.dest||{};
+  P.meta.dest.lat=(+last.lat).toFixed(6);P.meta.dest.lon=(+last.lon).toFixed(6);
+  if(!P.meta.dest.nom)P.meta.dest.nom='Último punto capturado (P'+last.id+')';
+  if($('m_dest_lat')){$('m_dest_lat').value=P.meta.dest.lat;$('m_dest_lon').value=P.meta.dest.lon;if(!$('m_dest_nom').value)$('m_dest_nom').value=P.meta.dest.nom;}
+}
+
+/* ================= FOTO ================= */
+function loadFoto(inp){
+  const f=inp.files[0];if(!f)return;$('fotoWarn').classList.remove('hidden');
+  const rd=new FileReader();
+  rd.onload=e=>{const img=new Image();img.onload=()=>{
+    const mx=1000;let{width:w,height:h}=img;if(w>mx||h>mx){const r=Math.min(mx/w,mx/h);w=Math.round(w*r);h=Math.round(h*r);}
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+    tmpFoto=cv.toDataURL('image/jpeg',0.55);
+    $('fotoPrev').innerHTML='<img class="photo-thumb" src="'+tmpFoto+'"/>';
+  };img.src=e.target.result;};
+  rd.readAsDataURL(f);
+}
+
+/* ================= GUARDAR PUNTO ================= */
+function savePoint(){
+  if(!armed){nuevoPunto();return;}
+  const lat=parseFloat($('c_lat').value),lon=parseFloat($('c_lon').value);
+  if(isNaN(lat)||isNaN(lon)){toast('Faltan coordenadas (usa el GPS o escríbelas)');return;}
+  if(!$('c_desc').value.trim()){toast('Falta la descripción del riesgo');return;}
+  if(!$('c_ctrl').value.trim()){toast('Falta la medida preventiva');return;}
+  const pt={
+    id: editId!=null?editId:(P.points.length?Math.max(...P.points.map(p=>p.id))+1:1),
+    lat:+lat.toFixed(6),lon:+lon.toFixed(6),km:$('c_km').value.trim(),
+    nivel:curNivel(),sev:$('c_sev').value,prob:$('c_prob').value,
+    ubic:$('c_ubic').value.trim(),desc:$('c_desc').value.trim(),ctrl:$('c_ctrl').value.trim(),
+    dis:$('c_dis').value.trim(),est:$('c_est').value,mat:$('c_mat').value.trim(),uti:$('c_uti').value,
+    veld:$('c_veld').value.trim(),velo:$('c_velo').value.trim(),
+    senV:existeSign('V'),senVSi:$('c_senV_si').checked,senVNo:$('c_senV_no').checked,senVList:signPresent('V'),senVReq:signRequired('V'),
+    senH:existeSign('H'),senHSi:$('c_senH_si').checked,senHNo:$('c_senH_no').checked,senHList:signPresent('H'),senHReq:signRequired('H'),ilum:$('c_ilum').value,
+    foto:tmpFoto||null, ts:Date.now()
+  };
+  if(editId!=null){const i=P.points.findIndex(p=>p.id===editId);P.points[i]=pt;}
+  else P.points.push(pt);
+  syncDestino();
+  sav();
+  const savedId=pt.id, wasEdit=editId!=null;
+  clearFields();
+  if(wasEdit){ setCapNew(); toast('Punto '+savedId+' actualizado ('+pt.nivel+')'); tab('pts'); return; }
+  // Punto nuevo guardado: el título queda "armado" para activar el siguiente
+  armed=false;
+  const h=$('capTitle');h.classList.add('ready');
+  h.innerHTML='✅ Punto N.º '+savedId+' guardado · <span class="cap-go">toca aquí para el siguiente ➕</span>';
+  $('btnSavePt').textContent='Toca el título para iniciar el nuevo punto';$('btnSavePt').classList.add('dis');
+  toast('Punto '+savedId+' guardado ('+pt.nivel+')');
+  window.scrollTo(0,0);
+}
+/* Limpia solo los campos, sin tocar el título */
+function clearFields(){
+  editId=null;tmpFoto=null;manualNivel=null;
+  ['c_lat','c_lon','c_km','c_ubic','c_desc','c_ctrl','c_dis','c_mat','c_veld','c_velo'].forEach(id=>$(id).value='');
+  $('c_est').value='Buena';$('c_uti').value='DOBLE SENTIDO';$('c_ilum').value='Buena';
+  $('c_senV_si').checked=true;$('c_senV_no').checked=false;$('c_senH_si').checked=true;$('c_senH_no').checked=false;
+  setChips('chSenV',[]);setChips('chSenH',[]);setChips('chReqV',[]);setChips('chReqH',[]);
+  ['c_senV_otra','c_senH_otra','c_senV_req_otra','c_senH_req_otra'].forEach(id=>{if($(id))$(id).value='';});
+  toggleCuales('V');toggleCuales('H');
+  $('c_sev').value='Media';$('c_prob').value='Probable';calcVal();
+  $('gpsOut').className='gps-out';$('fotoPrev').innerHTML='';if($('c_foto'))$('c_foto').value='';
+}
+/* Título por defecto, mostrando el número del próximo punto */
+function nextId(){return P.points.length?Math.max(...P.points.map(p=>p.id))+1:1;}
+function setCapNew(){
+  armed=true;
+  const h=$('capTitle');h.classList.remove('ready');
+  h.innerHTML='➕ Nuevo punto de riesgo <span class="cap-n">N.º '+nextId()+'</span>';
+  $('btnSavePt').textContent='✔ Guardar punto';$('btnSavePt').classList.remove('dis');
+}
+/* Activar la captura del siguiente punto (disparado al tocar el título) */
+function nuevoPunto(){
+  if(editId!=null){clearFields();}
+  setCapNew();window.scrollTo(0,0);
+  toast('Punto N.º '+nextId()+' listo para capturar');
+}
+/* Botón "Limpiar": vacía el formulario y reinicia el título */
+function clearForm(){clearFields();setCapNew();}
+function editPoint(id){
+  const p=P.points.find(x=>x.id===id);if(!p)return;editId=id;tmpFoto=p.foto||null;manualNivel=p.nivel;
+  $('c_lat').value=p.lat;$('c_lon').value=p.lon;$('c_km').value=p.km||'';$('c_ubic').value=p.ubic||'';
+  $('c_desc').value=p.desc||'';$('c_ctrl').value=p.ctrl||'';$('c_dis').value=p.dis||'';$('c_mat').value=p.mat||'';
+  $('c_est').value=p.est||'Buena';$('c_uti').value=p.uti||'DOBLE SENTIDO';$('c_veld').value=p.veld||'';$('c_velo').value=p.velo||'';
+  const setChk=(k)=>{let si=p['sen'+k+'Si'],no=p['sen'+k+'No'];
+    if(si===undefined&&no===undefined){const e=p['sen'+k];si=(e==='Sí'||e==='Parcial'||((p['sen'+k+'List']||[]).length>0));no=(e==='No'||e==='Parcial'||((p['sen'+k+'Req']||[]).length>0));}
+    $('c_sen'+k+'_si').checked=!!si;$('c_sen'+k+'_no').checked=!!no;};
+  setChk('V');setChk('H');$('c_ilum').value=p.ilum||'Buena';
+  loadSel('chSenV','c_senV_otra',p.senVList);loadSel('chReqV','c_senV_req_otra',p.senVReq);
+  loadSel('chSenH','c_senH_otra',p.senHList);loadSel('chReqH','c_senH_req_otra',p.senHReq);
+  toggleCuales('V');toggleCuales('H');
+  $('c_sev').value=p.sev||'Media';$('c_prob').value=p.prob||'Probable';
+  paintNivel(p.nivel,NIV_TO[p.nivel]);
+  $('fotoPrev').innerHTML=p.foto?'<img class="photo-thumb" src="'+p.foto+'"/>':'';
+  armed=true;$('capTitle').classList.remove('ready');
+  $('capTitle').textContent='✏️ Editando punto '+id;$('btnSavePt').textContent='✔ Actualizar punto';$('btnSavePt').classList.remove('dis');
+  tab('cap');
+}
+function delPoint(id){if(!confirm('¿Borrar el punto '+id+'?'))return;P.points=P.points.filter(p=>p.id!==id);syncDestino();sav();renderPts();toast('Punto '+id+' eliminado');}
+
+/* ================= RENDER PUNTOS ================= */
+function renderPts(){
+  const q=($('ptSearch').value||'').toLowerCase().trim();
+  const a=P.points.filter(p=>p.nivel==='Alto').length,m=P.points.filter(p=>p.nivel==='Medio').length,b=P.points.filter(p=>p.nivel==='Bajo').length;
+  $('stT').textContent=P.points.length;$('stA').textContent=a;$('stM').textContent=m;$('stB').textContent=b;
+  $('ptsCnt').textContent=P.points.length+' punto(s)';$('tabCnt').textContent=P.points.length?('('+P.points.length+')'):'';
+  const fil=P.points.filter(p=>!q||((p.id+' '+p.desc+' '+p.ctrl+' '+(p.ubic||'')).toLowerCase().includes(q)));
+  $('ptList').innerHTML=fil.map(p=>{
+    return '<li class="pitem l-'+p.nivel+'"><div class="pi-h"><span class="pi-t">P'+p.id+(p.km?(' · km '+p.km):'')+'</span><span class="pi-b b-'+p.nivel+'">'+p.nivel+'</span></div>'
+      +'<div class="pi-m">'+esc(p.desc)+'</div>'
+      +'<div class="pi-c">'+p.lat+', '+p.lon+(p.dis?(' · '+esc(p.dis)):'')+'</div>'
+      +'<div class="pi-act"><button class="btn btn-o" onclick="editPoint('+p.id+')">✏️ Editar</button><button class="btn btn-d" onclick="delPoint('+p.id+')">🗑️ Borrar</button></div></li>';
+  }).join('')||'<li class="mini">Aún no hay puntos. Ve a «Capturar».</li>';
+  drawPlot();
+}
+function esc(s){return(s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ================= CROQUIS OFFLINE ================= */
+function drawPlot(){
+  const cv=$('plot');if(!cv)return;const dpr=window.devicePixelRatio||1;
+  const W=cv.clientWidth,H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext('2d');g.scale(dpr,dpr);
+  g.clearRect(0,0,W,H);
+  const pts=[...P.points];
+  const om=P.meta;const extra=[];
+  if(om.orig&&om.orig.lat)extra.push({lat:+om.orig.lat,lon:+om.orig.lon});
+  if(om.dest&&om.dest.lat)extra.push({lat:+om.dest.lat,lon:+om.dest.lon});
+  const all=pts.concat(extra);
+  if(all.length<1){g.fillStyle='#9bb';g.font='12px system-ui';g.fillText('Sin puntos',12,24);return;}
+  const las=all.map(p=>+p.lat),los=all.map(p=>+p.lon);
+  let laMin=Math.min(...las),laMax=Math.max(...las),loMin=Math.min(...los),loMax=Math.max(...los);
+  const pad=18;const dLa=(laMax-laMin)||1e-4,dLo=(loMax-loMin)||1e-4;
+  const X=lo=>pad+(lo-loMin)/dLo*(W-2*pad);const Y=la=>H-pad-(la-laMin)/dLa*(H-2*pad);
+  // línea de ruta
+  if(pts.length>1){g.strokeStyle='rgba(20,82,71,.35)';g.lineWidth=1.5;g.setLineDash([5,4]);g.beginPath();pts.forEach((p,i)=>{const x=X(+p.lon),y=Y(+p.lat);i?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();g.setLineDash([]);}
+  // inicio/fin
+  if(om.orig&&om.orig.lat){g.fillStyle='#145247';const x=X(+om.orig.lon),y=Y(+om.orig.lat);g.beginPath();g.moveTo(x-6,y-6);g.lineTo(x+7,y);g.lineTo(x-6,y+6);g.closePath();g.fill();}
+  if(om.dest&&om.dest.lat){g.fillStyle='#d7263d';const x=X(+om.dest.lon),y=Y(+om.dest.lat);g.fillRect(x-5,y-5,10,10);}
+  // puntos
+  const col={Alto:'#d7263d',Medio:'#f29f05',Bajo:'#2f8f7d'};
+  pts.forEach(p=>{const x=X(+p.lon),y=Y(+p.lat);g.beginPath();g.arc(x,y,5,0,7);g.fillStyle=col[p.nivel]||'#888';g.fill();g.strokeStyle='#fff';g.lineWidth=1.5;g.stroke();});
+}
+
+/* ================= EMERGENCIAS Y POIS ================= */
+function renderEmg(){
+  if(!P.emerg||!P.emerg.length)P.emerg=DEF_EMERG.map(e=>({...e}));
+  $('emgList').innerHTML=P.emerg.map((e,i)=>'<div class="emg-row"><input value="'+esc(e.nom)+'" placeholder="Entidad" oninput="P.emerg['+i+'].nom=this.value;sav()"/><input value="'+esc(e.tel)+'" placeholder="Teléfono" oninput="P.emerg['+i+'].tel=this.value;sav()"/></div>').join('');
+  renderPOI();
+}
+function addEmg(){P.emerg.push({nom:'',tel:''});sav();renderEmg();}
+function addPOI(){
+  const lat=parseFloat($('poi_lat').value),lon=parseFloat($('poi_lon').value);
+  if(isNaN(lat)||isNaN(lon)){toast('El POI necesita coordenadas');return;}
+  if(!$('poi_nom').value.trim()){toast('El POI necesita un nombre');return;}
+  P.pois.push({tipo:$('poi_tipo').value,nom:$('poi_nom').value.trim(),dir:$('poi_dir').value.trim(),tel:$('poi_tel').value.trim(),nota:$('poi_nota').value.trim(),lat:+lat.toFixed(6),lon:+lon.toFixed(6)});
+  ['poi_nom','poi_dir','poi_tel','poi_nota','poi_lat','poi_lon'].forEach(id=>$(id).value='');
+  sav();renderPOI();toast('POI agregado');
+}
+function delPOI(i){P.pois.splice(i,1);sav();renderPOI();}
+function renderPOI(){
+  const emo={hosp:'🏥',bomb:'🚒',pol:'👮',gas:'⛽'};
+  $('poiList').innerHTML=(P.pois||[]).map((p,i)=>'<li class="pitem"><div class="pi-h"><span class="pi-t">'+emo[p.tipo]+' '+esc(p.nom)+'</span><button class="btn btn-d" style="padding:5px 10px;flex:0" onclick="delPOI('+i+')">🗑️</button></div><div class="pi-c">'+(p.tel?esc(p.tel)+' · ':'')+p.lat+', '+p.lon+'</div></li>').join('')||'<li class="mini">Sin POIs. Son opcionales.</li>';
+}
+
+/* ================= META (config) ================= */
+const META_FIELDS=['m_cliente','m_fecha','m_consultor','m_ruta','m_orig_nom','m_orig_lat','m_orig_lon','m_dest_nom','m_dest_lat','m_dest_lon','m_km','m_tiempo','m_ntramos','m_recs'];
+function saveMeta(){
+  const m=P.meta;
+  m.cliente=$('m_cliente').value.trim();m.fecha=$('m_fecha').value;m.consultor=$('m_consultor').value.trim();m.ruta=$('m_ruta').value.trim();
+  m.orig={nom:$('m_orig_nom').value.trim(),lat:$('m_orig_lat').value.trim(),lon:$('m_orig_lon').value.trim()};
+  m.dest={nom:$('m_dest_nom').value.trim(),lat:$('m_dest_lat').value.trim(),lon:$('m_dest_lon').value.trim()};
+  m.km=$('m_km').value.trim();m.tiempo=$('m_tiempo').value.trim();m.ntramos=+$('m_ntramos').value||4;
+  m.recs=$('m_recs').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  m.tramoObs=[];
+  $('topRuta').textContent=m.ruta?m.ruta:(m.cliente?('Cliente: '+m.cliente):'Sin ruta definida · configure el proyecto');
+  sav();
+}
+function fillMeta(){
+  const m=P.meta;
+  $('m_cliente').value=m.cliente||'';$('m_fecha').value=m.fecha||'';$('m_consultor').value=m.consultor||'';$('m_ruta').value=m.ruta||'';
+  $('m_orig_nom').value=(m.orig&&m.orig.nom)||'';$('m_orig_lat').value=(m.orig&&m.orig.lat)||'';$('m_orig_lon').value=(m.orig&&m.orig.lon)||'';
+  $('m_dest_nom').value=(m.dest&&m.dest.nom)||'';$('m_dest_lat').value=(m.dest&&m.dest.lat)||'';$('m_dest_lon').value=(m.dest&&m.dest.lon)||'';
+  $('m_km').value=m.km||'';$('m_tiempo').value=m.tiempo||'';$('m_ntramos').value=m.ntramos||4;
+  $('m_recs').value=(m.recs||[]).join('\n');
+  $('topRuta').textContent=m.ruta||(m.cliente?('Cliente: '+m.cliente):'Sin ruta definida · configure el proyecto');
+}
+
+/* ================= EXPORT / IMPORT ================= */
+function exportJSON(){saveMeta();dl('respaldo_'+sane(P.meta.cliente)+'_'+(P.meta.fecha||'')+'.json',JSON.stringify(P,null,2),'application/json');toast('Respaldo descargado');}
+function importJSON(inp){
+  const f=inp.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=e=>{try{const d=JSON.parse(e.target.result);if(!d.points)throw 0;
+    if(P.points.length&&!confirm('Esto reemplazará el proyecto actual ('+P.points.length+' puntos). ¿Continuar?')){inp.value='';return;}
+    P=d;P.meta=P.meta||{};P.points=P.points||[];P.pois=P.pois||[];P.emerg=P.emerg||[];
+    sav();fillMeta();renderPts();renderEmg();toast('Respaldo cargado: '+P.points.length+' puntos');tab('cfg');
+  }catch(err){toast('Archivo inválido');}inp.value='';};
+  rd.readAsText(f);
+}
+function exportCSV(){
+  saveMeta();
+  const H=['N','Km','Ubicacion','Diseno','Estado','Material','Utilizacion','Descripcion_riesgo','Valoracion','Nivel','Medida_control','Severidad','Probabilidad','SenalV','SenalV_cuales','SenalV_requeridas','SenalH','SenalH_cuales','SenalH_requeridas','Iluminacion','Vel_diseno','Vel_operacion','Latitud','Longitud'];
+  const rows=P.points.map(p=>[p.id,p.km||'',p.ubic||'',p.dis||'',p.est||'',p.mat||'',p.uti||'',p.desc||'',VAL_WORD[NIV_TO[p.nivel]],p.nivel,p.ctrl||'',p.sev||'',p.prob||'',p.senV||'',(p.senVList||[]).join(' | '),(p.senVReq||[]).join(' | '),p.senH||'',(p.senHList||[]).join(' | '),(p.senHReq||[]).join(' | '),p.ilum||'',p.veld||'',p.velo||'',p.lat,p.lon]);
+  const csv='\ufeff'+[H].concat(rows).map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  dl('rutograma_'+sane(P.meta.cliente)+'.csv',csv,'text/csv;charset=utf-8');toast('CSV descargado');
+}
+
+/* ================= VALIDACIÓN ================= */
+function checkGen(){
+  saveMeta();const m=P.meta;const miss=[];
+  if(!m.cliente)miss.push('Cliente');if(!m.fecha)miss.push('Fecha de ejecución');if(!m.ruta)miss.push('Nombre de la ruta');
+  if(!P.points.length)miss.push('al menos 1 punto capturado');
+  const el=$('genCheck');
+  if(miss.length){el.className='alertbox';el.innerHTML='⚠ Antes de generar el entregable, completa: <b>'+miss.join(', ')+'</b>.';}
+  else{el.className='okbox';el.innerHTML='✅ Listo para generar. '+P.points.length+' punto(s) · '+(P.pois.length)+' POI(s) · '+(m.km?('~'+m.km+' km'):'sin km')+'.';}
+  return miss.length===0;
+}
+
+/* ================= GENERAR ENTREGABLE ================= */
+function genDeliverable(){
+  if(!checkGen()){tab('gen');toast('Faltan datos obligatorios');return;}
+  const m=P.meta;
+  // reindex 1..n por orden de captura para etiquetas limpias P1..Pn
+  const risk=P.points.map((p,i)=>({
+    id:i+1,lat:+p.lat,lon:+p.lon,km:p.km||'',nivel:p.nivel,
+    desc:p.desc||'',ctrl:p.ctrl||'',est:p.est||'',mat:p.mat||'',
+    senV:p.senV||'',senVList:p.senVList||[],senVReq:p.senVReq||[],senH:p.senH||'',senHList:p.senHList||[],senHReq:p.senHReq||[],ilum:p.ilum||'',veld:p.veld||'',velo:p.velo||'',
+    vel:(p.veld||p.velo)?('Diseño '+(p.veld||'—')+' / Operación '+(p.velo||'—')+' km/h'):'',
+    foto:p.foto||null
+  }));
+  const meta={
+    cliente:m.cliente,fecha:m.fecha,consultor:m.consultor||'',ruta:m.ruta,
+    km:m.km||'',tiempo:m.tiempo||'',ntramos:m.ntramos||4,
+    orig:m.orig||{},dest:m.dest||{},
+    tramoObs:m.tramoObs||[],recs:m.recs||[],
+    emerg:(P.emerg||[]).filter(e=>e.nom||e.tel)
+  };
+  const pois=(P.pois||[]).map(p=>({tipo:p.tipo,nom:p.nom,dir:p.dir||'',tel:p.tel||'',nota:p.nota||'',lat:+p.lat,lon:+p.lon}));
+  let tpl=$('tplDeliverable').textContent;
+  tpl=tpl.replace(/<\\\/script>/g,'<'+'/script>'); // des-escapar cierres
+  tpl=tpl.replace('@@TITLE@@',(m.cliente+' '+(m.ruta||'')).replace(/[<>]/g,''))
+         .replace('@@META@@',JSON.stringify(meta))
+         .replace('@@RISK@@',JSON.stringify(risk))
+         .replace('@@POIS@@',JSON.stringify(pois))
+         .replace('@@ZONAS@@',JSON.stringify([]));
+  dl('Rutograma_'+sane(m.cliente)+'_'+(m.fecha||'')+'.html',tpl,'text/html;charset=utf-8');
+  toast('Entregable generado ✔');
+}
+
+/* ================= WIPE ================= */
+function wipe(){if(!confirm('Esto borra TODO el proyecto (config, puntos, POIs). ¿Seguro?'))return;if(!confirm('Confirma de nuevo: se perderá lo no respaldado.'))return;P={meta:{},points:[],pois:[],emerg:[]};localStorage.removeItem(LS_KEY);fillMeta();renderPts();renderEmg();toast('Proyecto borrado');tab('cfg');}
+
+/* ================= INIT ================= */
+function init(){
+  load();
+  META_FIELDS.forEach(id=>{const el=$(id);if(el)el.addEventListener('input',saveMeta);});
+  $('m_ntramos').addEventListener('change',saveMeta);
+  buildQP();buildSignChips();fillMeta();syncDestino();renderPts();renderEmg();calcVal();setCapNew();toggleCuales('V');toggleCuales('H');
+  $('fabSave').style.display='none';
+  if(!P.meta.fecha){$('m_fecha').value=new Date().toISOString().slice(0,10);saveMeta();}
+  window.addEventListener('resize',()=>{if($('s-pts').classList.contains('on'))drawPlot();});
+}
+init();
+
+</script>
+</body>
+</html>
